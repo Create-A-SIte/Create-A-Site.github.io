@@ -443,55 +443,90 @@
         const closeFullscreen = document.getElementById('close-fullscreen');
 
         runButton.addEventListener('click', async function() {
-            const prompt = promptInput.value.trim();
-            const model = document.getElementById('ai-model').value;
-            
-            if (!prompt) {
-                alert('Please enter a prompt');
-                return;
-            }
+    const prompt = promptInput.value.trim();
+    const model = document.getElementById('ai-model').value;
+    
+    if (!prompt) {
+        alert('Please enter a prompt');
+        return;
+    }
 
-            // Show loading state
-            loading.classList.remove('hidden');
-            codeEditor.textContent = '';
+    // Show loading state
+    loading.classList.remove('hidden');
+    codeEditor.textContent = '';
+    runButton.disabled = true;
+    runButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating...';
 
-            try {
-                const response = await fetch('https://create-a-site-backend.onrender.com/api/generate', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        prompt: prompt,
-                        model: model
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                
-                let generatedCode = '';
-                if (data.choices?.[0]?.message?.content) {
-                    generatedCode = data.choices[0].message.content;
-                } else if (data.generatedCode) {
-                    generatedCode = data.generatedCode;
-                } else {
-                    generatedCode = JSON.stringify(data, null, 2);
-                }
-
-                codeEditor.textContent = generatedCode;
-                updateOutput();
-
-            } catch (error) {
-                console.error('API Error:', error);
-                codeEditor.textContent = `Error: ${error.message}\n\nPlease try again.`;
-            } finally {
-                loading.classList.add('hidden');
-            }
+    try {
+        const apiUrl = 'https://create-a-site-backend.onrender.com/api/generate';
+        console.log('Sending request to:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ 
+                prompt: prompt,
+                model: model
+            }),
+            credentials: 'omit'
         });
+
+        console.log('Received response status:', response.status);
+        
+        if (!response.ok) {
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            throw new Error(errorData.error || errorData.message || `Request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        let generatedCode = data.generatedCode || data.choices?.[0]?.message?.content || '';
+        
+        if (!generatedCode.includes('<!DOCTYPE html>')) {
+            generatedCode = `<!-- Generated code (might need adjustments) -->\n${generatedCode}`;
+        }
+
+        codeEditor.textContent = generatedCode;
+        updateOutput();
+
+    } catch (error) {
+        console.error('API Error:', error);
+        let errorMessage = `Error: ${error.message}`;
+        
+        // Special handling for CORS errors
+        if (error.message.includes('Failed to fetch') || error.message.includes('Access-Control')) {
+            errorMessage += '\n\nCORS issue detected. Please:\n1. Check your backend CORS settings\n2. Ensure the backend URL is correct\n3. Try refreshing the page';
+        }
+        
+        codeEditor.textContent = errorMessage;
+        
+        // Show error in UI temporarily
+        runButton.classList.remove('bg-blue-600');
+        runButton.classList.add('bg-red-600');
+        setTimeout(() => {
+            runButton.classList.remove('bg-red-600');
+            runButton.classList.add('bg-blue-600');
+        }, 3000);
+
+    } finally {
+        loading.classList.add('hidden');
+        runButton.disabled = false;
+        runButton.innerHTML = '<i class="fas fa-play mr-2"></i> Generate Code';
+        
+        // Scroll to show the generated code
+        codeEditor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+});
 
         // Function to update output preview
         function updateOutput() {
