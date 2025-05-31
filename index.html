@@ -491,10 +491,30 @@
         console.log('Response data:', data);
         
         let generatedCode = data.generatedCode || data.choices?.[0]?.message?.content || '';
-        
-        if (!generatedCode.includes('<!DOCTYPE html>')) {
-            generatedCode = `<!-- Generated code (might need adjustments) -->\n${generatedCode}`;
-        }
+
+// Extract just the code between ```html ``` markers if they exist
+const htmlBlockMatch = generatedCode.match(/```html\n([\s\S]*?)\n```/);
+if (htmlBlockMatch && htmlBlockMatch[1]) {
+    generatedCode = htmlBlockMatch[1].trim();
+}
+
+// Or extract between any ``` markers if no html specific ones
+const codeBlockMatch = generatedCode.match(/```\n([\s\S]*?)\n```/);
+if (codeBlockMatch && codeBlockMatch[1]) {
+    generatedCode = codeBlockMatch[1].trim();
+}
+
+// Remove any introductory text before the actual code
+if (generatedCode.includes('<!DOCTYPE html>')) {
+    const docStart = generatedCode.indexOf('<!DOCTYPE html>');
+    generatedCode = generatedCode.substring(docStart);
+}
+
+// Remove any trailing text after the closing </html> tag
+if (generatedCode.includes('</html>')) {
+    const docEnd = generatedCode.indexOf('</html>') + 7;
+    generatedCode = generatedCode.substring(0, docEnd);
+}
 
         codeEditor.textContent = generatedCode;
         updateOutput();
