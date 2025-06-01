@@ -1,9 +1,8 @@
-const CACHE_NAME = 'create-a-site-v1';
+const CACHE_NAME = 'create-a-site-v2'; // Update version with each deployment
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
-  '/app.js',
   '/manifest.json',
   '/icons/icon-72x72.png',
   '/icons/icon-96x96.png',
@@ -22,7 +21,7 @@ self.addEventListener('install', event => {
       .then(cache => {
         return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting()) // Force the waiting service worker to become active
+      .then(() => self.skipWaiting()) // Force the waiting SW to become active
   );
 });
 
