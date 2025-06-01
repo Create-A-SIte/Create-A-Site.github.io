@@ -612,6 +612,96 @@ if (generatedCode.includes('</html>')) {
         codeEditor.textContent = '<!-- Your generated code will appear here -->';
         updateOutput();
     </script>
-    <script src="/app.js"></script>
+    <script>
+  // Service Worker Registration and Update Handling
+  if ('serviceWorker' in navigator) {
+    // Register service worker
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function(registration) {
+          console.log('ServiceWorker registration successful');
+          
+          // Check for updates periodically (every hour)
+          setInterval(function() {
+            registration.update().catch(err => {
+              console.log('Update check failed:', err);
+            });
+          }, 60 * 60 * 1000);
+          
+          // Listen for updates
+          registration.addEventListener('updatefound', function() {
+            const newWorker = registration.installing;
+            
+            newWorker.addEventListener('statechange', function() {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New update available
+                showUpdateNotification();
+              }
+            });
+          });
+        })
+        .catch(function(err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+    
+    // Reload when the new service worker takes control
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (refreshing) return;
+      window.location.reload();
+      refreshing = true;
+    });
+  }
+  
+  // Show update notification
+  function showUpdateNotification() {
+    // You can customize this UI to match your app's design
+    const notification = document.createElement('div');
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.right = '20px';
+    notification.style.backgroundColor = '#3b82f6';
+    notification.style.color = 'white';
+    notification.style.padding = '15px';
+    notification.style.borderRadius = '5px';
+    notification.style.zIndex = '10000';
+    notification.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+    notification.innerHTML = `
+      <p>A new version is available!</p>
+      <button id="updateButton" style="
+        background: white;
+        color: #3b82f6;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        margin-top: 8px;
+        cursor: pointer;
+      ">Update Now</button>
+      <button id="dismissButton" style="
+        background: transparent;
+        color: white;
+        border: 1px solid white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        margin-top: 8px;
+        margin-left: 5px;
+        cursor: pointer;
+      ">Dismiss</button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    document.getElementById('updateButton').addEventListener('click', function() {
+      // Tell the service worker to skip waiting and activate
+      navigator.serviceWorker.controller.postMessage({action: 'skipWaiting'});
+      notification.remove();
+    });
+    
+    document.getElementById('dismissButton').addEventListener('click', function() {
+      notification.remove();
+    });
+  }
+</script>
 </body>
 </html>
