@@ -1,6 +1,6 @@
 {
   "name": "Create-A-Site",
-  "short_name": "CreateASite",
+  "short_name": "Create-A-Site",
   "description": "AI-powered website creation tool",
   "start_url": "/",
   "display": "standalone",
