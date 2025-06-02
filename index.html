@@ -512,6 +512,16 @@
             Prism.plugins.lineNumbers.resize();
         }
 
+// Force Prism to re-analyze the content
+        function forcePrismUpdate() {
+            const codeEditor = document.getElementById('code-editor');
+            codeEditor.classList.remove('language-html');
+            void codeEditor.offsetWidth; // Trigger reflow
+            codeEditor.classList.add('language-html');
+            Prism.highlightElement(codeEditor);
+            Prism.plugins.lineNumbers.resize();
+        }
+
         // Function to update output preview (modified to preserve highlighting)
         function updateOutput() {
             // Get the raw text content (without HTML tags from highlighting)
