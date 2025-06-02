@@ -34,13 +34,53 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Prism.js Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
     <style>
         .code-editor {
             min-height: 300px;
-            font-family: 'Courier New', monospace;
+            font-family: 'Fira Code', 'Courier New', monospace;
             line-height: 1.5;
             tab-size: 4;
             color: #e2e8f0;
+            background-color: #2d2d2d !important;
+            border-radius: 0.375rem;
+            overflow: auto;
+            white-space: pre !important;
+            margin: 0;
+            padding: 1rem !important;
+        }
+        
+        /* Make the editable area look like code */
+        #code-editor[contenteditable="true"] {
+            outline: none;
+            caret-color: #fff;
+        }
+        
+        /* Add line numbers */
+        .line-numbers {
+            counter-reset: linenumber;
+        }
+        
+        .line-numbers > span {
+            display: block;
+            position: relative;
+            padding-left: 3.8em;
+        }
+        
+        .line-numbers > span:before {
+            counter-increment: linenumber;
+            content: counter(linenumber);
+            position: absolute;
+            left: 0;
+            color: #6c6c6c;
+            display: inline-block;
+            width: 2.5em;
+            text-align: right;
+            padding-right: 0.8em;
+            border-right: 1px solid #4a4a4a;
+            margin-right: 0.8em;
         }
         
         .output-frame {
@@ -173,10 +213,10 @@
                             <label for="ai-model" class="block text-sm font-medium text-gray-300 mb-1">AI Model</label>
                             <select id="ai-model" class="mt-1 bg-dark-300 border-gray-600 text-gray-200 block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                                 <option value="deepseek-chat-v3">DeepSeek-V3-0324 (Top Performance)</option>
-  <option value="deepcoder-chat">DeepCoder 14B (Quick, with basic output)</option>
-  <option value="olympiccoder-chat">Olympic Coder 32B</option>
-  <option value="qwen-coder-chat">Qwen2.5 Coder 32B Instruct (Good Choice, but buggy)</option>
-  <option value="qwerky-chat">Qwerky 72B</option>
+                                <option value="deepcoder-chat">DeepCoder 14B (Quick, with basic output)</option>
+                                <option value="olympiccoder-chat">Olympic Coder 32B</option>
+                                <option value="qwen-coder-chat">Qwen2.5 Coder 32B Instruct (Good Choice, but buggy)</option>
+                                <option value="qwerky-chat">Qwerky 72B</option>
                             </select>
                         </div>
                         <div>
@@ -208,7 +248,7 @@
                                 </button>
                             </div>
                         </div>
-                        <pre id="code-editor" class="code-editor bg-dark-300 p-4 rounded-md overflow-auto" contenteditable="true"><!-- Generated code will appear here --></pre>
+                        <pre id="code-editor" class="code-editor line-numbers language-html bg-dark-300 rounded-md overflow-auto" contenteditable="true"><!-- Generated code will appear here --></pre>
                     </div>
 
                     <!-- Output Preview (now on the right) -->
@@ -363,17 +403,17 @@
                             <h4 class="font-medium text-gray-100 mb-3">Follow Us</h4>
                             <div class="flex space-x-4">
                                 <a href="https://twitter.com/yourprofile" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-500">
-    <i class="fab fa-twitter text-xl"></i>
-</a>
-<a href="https://github.com/Create-A-Site" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-500">
-    <i class="fab fa-github text-xl"></i>
-</a>
-<a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-500">
-    <i class="fab fa-linkedin text-xl"></i>
-</a>
-<a href="https://discord.gg/yourinvitecode" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-500">
-    <i class="fab fa-discord text-xl"></i>
-</a>
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                                <a href="https://github.com/Create-A-Site" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-500">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                                <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-500">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="https://discord.gg/yourinvitecode" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-500">
+                                    <i class="fab fa-discord text-xl"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -388,7 +428,7 @@
                     <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
                 <h3 class="text-lg font-medium text-gray-100 mb-2">Generating your code</h3>
-                <p class="text-sm text-gray-400">This may take 5-10 minutes minutes<span class="loading-dots"></span></p>
+                <p class="text-sm text-gray-400">The time may vary depending on the model<span class="loading-dots"></span></p>
             </div>
         </div>
     </div>
@@ -398,6 +438,12 @@
         <button id="close-fullscreen"><i class="fas fa-times"></i></button>
         <iframe id="fullscreen-preview-content"></iframe>
     </div>
+
+    <!-- Prism.js Syntax Highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/normalize-whitespace/prism-normalize-whitespace.min.js"></script>
 
     <script>
         // Mobile menu toggle
@@ -448,119 +494,141 @@
         const fullscreenPreviewContent = document.getElementById('fullscreen-preview-content');
         const closeFullscreen = document.getElementById('close-fullscreen');
 
-        runButton.addEventListener('click', async function() {
-    const prompt = promptInput.value.trim();
-    const model = document.getElementById('ai-model').value;
-    
-    if (!prompt) {
-        alert('Please enter a prompt');
-        return;
-    }
-
-    // Show loading state
-    loading.classList.remove('hidden');
-    codeEditor.textContent = '';
-    runButton.disabled = true;
-    runButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating...';
-
-    try {
-        const apiUrl = 'https://create-a-website-backend.onrender.com/api/generate';
-        console.log('Sending request to:', apiUrl);
-        
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ 
-                prompt: prompt,
-                model: model
-            }),
-            credentials: 'omit'
-        });
-
-        console.log('Received response status:', response.status);
-        
-        if (!response.ok) {
-            let errorData;
-            try {
-                errorData = await response.json();
-            } catch (e) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            throw new Error(errorData.error || errorData.message || `Request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        let generatedCode = data.generatedCode || data.choices?.[0]?.message?.content || '';
-
-// Extract just the code between ```html ``` markers if they exist
-const htmlBlockMatch = generatedCode.match(/```html\n([\s\S]*?)\n```/);
-if (htmlBlockMatch && htmlBlockMatch[1]) {
-    generatedCode = htmlBlockMatch[1].trim();
-}
-
-// Or extract between any ``` markers if no html specific ones
-const codeBlockMatch = generatedCode.match(/```\n([\s\S]*?)\n```/);
-if (codeBlockMatch && codeBlockMatch[1]) {
-    generatedCode = codeBlockMatch[1].trim();
-}
-
-// Remove any introductory text before the actual code
-if (generatedCode.includes('<!DOCTYPE html>')) {
-    const docStart = generatedCode.indexOf('<!DOCTYPE html>');
-    generatedCode = generatedCode.substring(docStart);
-}
-
-// Remove any trailing text after the closing </html> tag
-if (generatedCode.includes('</html>')) {
-    const docEnd = generatedCode.indexOf('</html>') + 7;
-    generatedCode = generatedCode.substring(0, docEnd);
-}
-
-        codeEditor.textContent = generatedCode;
-        updateOutput();
-
-    } catch (error) {
-        console.error('API Error:', error);
-        let errorMessage = `Error: ${error.message}`;
-        
-        // Special handling for CORS errors
-        if (error.message.includes('Failed to fetch') || error.message.includes('Access-Control')) {
-            errorMessage += '\n\nCORS issue detected. Please:\n1. Check your backend CORS settings\n2. Ensure the backend URL is correct\n3. Try refreshing the page';
-        }
-        
-        codeEditor.textContent = errorMessage;
-        
-        // Show error in UI temporarily
-        runButton.classList.remove('bg-blue-600');
-        runButton.classList.add('bg-red-600');
-        setTimeout(() => {
-            runButton.classList.remove('bg-red-600');
-            runButton.classList.add('bg-blue-600');
-        }, 3000);
-
-    } finally {
-        loading.classList.add('hidden');
-        runButton.disabled = false;
-        runButton.innerHTML = '<i class="fas fa-play mr-2"></i> Generate Code';
-        
-        // Scroll to show the generated code
-        codeEditor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-});
-
-        // Function to update output preview
-        function updateOutput() {
+        // Function to apply syntax highlighting
+        function applySyntaxHighlighting() {
             const code = codeEditor.textContent;
-            const iframe = document.getElementById('output-frame');
-            iframe.srcdoc = code;
-            fullscreenPreviewContent.srcdoc = code;
+            
+            // Create a temporary element to parse the HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = code;
+            
+            // Get the text content with HTML entities decoded
+            const decodedCode = temp.textContent;
+            
+            // Apply syntax highlighting
+            codeEditor.innerHTML = Prism.highlight(decodedCode, Prism.languages.html, 'html');
+            
+            // Add line numbers
+            Prism.plugins.lineNumbers.resize();
         }
+
+        // Function to update output preview (modified to preserve highlighting)
+        function updateOutput() {
+            // Get the raw text content (without HTML tags from highlighting)
+            const rawCode = codeEditor.textContent;
+            const iframe = document.getElementById('output-frame');
+            iframe.srcdoc = rawCode;
+            fullscreenPreviewContent.srcdoc = rawCode;
+        }
+
+        runButton.addEventListener('click', async function() {
+            const prompt = promptInput.value.trim();
+            const model = document.getElementById('ai-model').value;
+            
+            if (!prompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+
+            // Show loading state
+            loading.classList.remove('hidden');
+            codeEditor.textContent = '';
+            runButton.disabled = true;
+            runButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating...';
+
+            try {
+                const apiUrl = 'https://create-a-website-backend.onrender.com/api/generate';
+                console.log('Sending request to:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        prompt: prompt,
+                        model: model
+                    }),
+                    credentials: 'omit'
+                });
+
+                console.log('Received response status:', response.status);
+                
+                if (!response.ok) {
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch (e) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    throw new Error(errorData.error || errorData.message || `Request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                let generatedCode = data.generatedCode || data.choices?.[0]?.message?.content || '';
+
+                // Extract just the code between ```html ``` markers if they exist
+                const htmlBlockMatch = generatedCode.match(/```html\n([\s\S]*?)\n```/);
+                if (htmlBlockMatch && htmlBlockMatch[1]) {
+                    generatedCode = htmlBlockMatch[1].trim();
+                }
+
+                // Or extract between any ``` markers if no html specific ones
+                const codeBlockMatch = generatedCode.match(/```\n([\s\S]*?)\n```/);
+                if (codeBlockMatch && codeBlockMatch[1]) {
+                    generatedCode = codeBlockMatch[1].trim();
+                }
+
+                // Remove any introductory text before the actual code
+                if (generatedCode.includes('<!DOCTYPE html>')) {
+                    const docStart = generatedCode.indexOf('<!DOCTYPE html>');
+                    generatedCode = generatedCode.substring(docStart);
+                }
+
+                // Remove any trailing text after the closing </html> tag
+                if (generatedCode.includes('</html>')) {
+                    const docEnd = generatedCode.indexOf('</html>') + 7;
+                    generatedCode = generatedCode.substring(0, docEnd);
+                }
+
+                codeEditor.textContent = generatedCode;
+                setTimeout(() => {
+                    applySyntaxHighlighting();
+                }, 100);
+                updateOutput();
+
+            } catch (error) {
+                console.error('API Error:', error);
+                let errorMessage = `Error: ${error.message}`;
+                
+                // Special handling for CORS errors
+                if (error.message.includes('Failed to fetch') || error.message.includes('Access-Control')) {
+                    errorMessage += '\n\nCORS issue detected. Please:\n1. Check your backend CORS settings\n2. Ensure the backend URL is correct\n3. Try refreshing the page';
+                }
+                
+                codeEditor.textContent = errorMessage;
+                
+                // Show error in UI temporarily
+                runButton.classList.remove('bg-blue-600');
+                runButton.classList.add('bg-red-600');
+                setTimeout(() => {
+                    runButton.classList.remove('bg-red-600');
+                    runButton.classList.add('bg-blue-600');
+                }, 3000);
+
+            } finally {
+                loading.classList.add('hidden');
+                runButton.disabled = false;
+                runButton.innerHTML = '<i class="fas fa-play mr-2"></i> Generate Code';
+                
+                // Scroll to show the generated code
+                codeEditor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
 
         // Copy button functionality
         copyButton.addEventListener('click', function() {
@@ -608,100 +676,108 @@ if (generatedCode.includes('</html>')) {
             document.body.style.overflow = '';
         });
 
-        // Initialize with empty code
-        codeEditor.textContent = '<!-- Your generated code will appear here -->';
+        // Add event listener for manual code editing
+        codeEditor.addEventListener('input', function() {
+            setTimeout(() => {
+                applySyntaxHighlighting();
+            }, 300);
+        });
+
+        // Initialize with syntax highlighting
+        codeEditor.textContent = '<!-- Your generated code will appear here -->\n<!DOCTYPE html>\n<html>\n<head>\n  <title>Sample</title>\n</head>\n<body>\n  <h1>Hello World</h1>\n</body>\n</html>';
+        applySyntaxHighlighting();
         updateOutput();
     </script>
     <script>
-  // Service Worker Registration and Update Handling
-  if ('serviceWorker' in navigator) {
-    // Register service worker
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js')
-        .then(function(registration) {
-          console.log('ServiceWorker registration successful');
-          
-          // Check for updates periodically (every hour)
-          setInterval(function() {
-            registration.update().catch(err => {
-              console.log('Update check failed:', err);
+        // Service Worker Registration and Update Handling
+        if ('serviceWorker' in navigator) {
+            // Register service worker
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                        
+                        // Check for updates periodically (every hour)
+                        setInterval(function() {
+                            registration.update().catch(err => {
+                                console.log('Update check failed:', err);
+                            });
+                        }, 60 * 60 * 1000);
+                        
+                        // Listen for updates
+                        registration.addEventListener('updatefound', function() {
+                            const newWorker = registration.installing;
+                            
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New update available
+                                    showUpdateNotification();
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
             });
-          }, 60 * 60 * 1000);
-          
-          // Listen for updates
-          registration.addEventListener('updatefound', function() {
-            const newWorker = registration.installing;
             
-            newWorker.addEventListener('statechange', function() {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New update available
-                showUpdateNotification();
-              }
+            // Reload when the new service worker takes control
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', function() {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
             });
-          });
-        })
-        .catch(function(err) {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-    });
-    
-    // Reload when the new service worker takes control
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', function() {
-      if (refreshing) return;
-      window.location.reload();
-      refreshing = true;
-    });
-  }
-  
-  // Show update notification
-  function showUpdateNotification() {
-    // You can customize this UI to match your app's design
-    const notification = document.createElement('div');
-    notification.style.position = 'fixed';
-    notification.style.bottom = '20px';
-    notification.style.right = '20px';
-    notification.style.backgroundColor = '#3b82f6';
-    notification.style.color = 'white';
-    notification.style.padding = '15px';
-    notification.style.borderRadius = '5px';
-    notification.style.zIndex = '10000';
-    notification.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-    notification.innerHTML = `
-      <p>A new version is available!</p>
-      <button id="updateButton" style="
-        background: white;
-        color: #3b82f6;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 3px;
-        margin-top: 8px;
-        cursor: pointer;
-      ">Update Now</button>
-      <button id="dismissButton" style="
-        background: transparent;
-        color: white;
-        border: 1px solid white;
-        padding: 5px 10px;
-        border-radius: 3px;
-        margin-top: 8px;
-        margin-left: 5px;
-        cursor: pointer;
-      ">Dismiss</button>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    document.getElementById('updateButton').addEventListener('click', function() {
-      // Tell the service worker to skip waiting and activate
-      navigator.serviceWorker.controller.postMessage({action: 'skipWaiting'});
-      notification.remove();
-    });
-    
-    document.getElementById('dismissButton').addEventListener('click', function() {
-      notification.remove();
-    });
-  }
-</script>
+        }
+        
+        // Show update notification
+        function showUpdateNotification() {
+            // You can customize this UI to match your app's design
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = '#3b82f6';
+            notification.style.color = 'white';
+            notification.style.padding = '15px';
+            notification.style.borderRadius = '5px';
+            notification.style.zIndex = '10000';
+            notification.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            notification.innerHTML = `
+                <p>A new version is available!</p>
+                <button id="updateButton" style="
+                    background: white;
+                    color: #3b82f6;
+                    border: none;
+                    padding: 5px 10px;
+                    border-radius: 3px;
+                    margin-top: 8px;
+                    cursor: pointer;
+                ">Update Now</button>
+                <button id="dismissButton" style="
+                    background: transparent;
+                    color: white;
+                    border: 1px solid white;
+                    padding: 5px 10px;
+                    border-radius: 3px;
+                    margin-top: 8px;
+                    margin-left: 5px;
+                    cursor: pointer;
+                ">Dismiss</button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            document.getElementById('updateButton').addEventListener('click', function() {
+                // Tell the service worker to skip waiting and activate
+                navigator.serviceWorker.controller.postMessage({action: 'skipWaiting'});
+                notification.remove();
+            });
+            
+            document.getElementById('dismissButton').addEventListener('click', function() {
+                notification.remove();
+            });
+        }
+    </script>
 </body>
 </html>
