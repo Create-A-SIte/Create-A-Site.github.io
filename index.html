@@ -641,7 +641,6 @@ document.getElementById('contact-form').addEventListener('submit', async functio
     const submitButton = form.querySelector('button[type="submit"]');
     const originalButtonText = submitButton.innerHTML;
     
-    // Disable button and show loading state
     submitButton.disabled = true;
     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
     
@@ -653,21 +652,28 @@ document.getElementById('contact-form').addEventListener('submit', async functio
             message: form.message.value
         };
         
-        // Replace with your Google Apps Script web app URL
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzZ4neHcaswkJrlx6csPjVrcKwNfNhiMmY_7IxPVHNFO6bo1rH6S4qLIKyLHLojAmDA/exec';
+        // Make sure this URL ends with /exec (not /dev)
+        const scriptUrl = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
         
         const response = await fetch(scriptUrl, {
             method: 'POST',
+            mode: 'no-cors', // Add this line to handle CORS
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData)
         });
         
-        const result = await response.json();
+        // Try to parse the response, but handle non-JSON responses
+        let result;
+        try {
+            result = await response.text();
+            result = result ? JSON.parse(result) : {};
+        } catch (e) {
+            result = { success: false, message: "Unexpected response format" };
+        }
         
-        if (result.success) {
-            // Show success message
+        if (result.success || response.ok) {
             alert('Message sent successfully!');
             form.reset();
         } else {
@@ -677,7 +683,6 @@ document.getElementById('contact-form').addEventListener('submit', async functio
         console.error('Error:', error);
         alert('Error: ' + error.message);
     } finally {
-        // Reset button state
         submitButton.disabled = false;
         submitButton.innerHTML = originalButtonText;
     }
