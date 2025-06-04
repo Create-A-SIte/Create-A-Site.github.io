@@ -641,6 +641,7 @@ document.getElementById('contact-form').addEventListener('submit', async functio
     const submitButton = form.querySelector('button[type="submit"]');
     const originalButtonText = submitButton.innerHTML;
     
+    // Disable button and show loading state
     submitButton.disabled = true;
     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
     
@@ -649,40 +650,41 @@ document.getElementById('contact-form').addEventListener('submit', async functio
             name: form.name.value,
             email: form.email.value,
             subject: form.subject.value,
-            message: form.message.value
+            message: form.message.value,
+            timestamp: new Date().toISOString()
         };
         
-        // Make sure this URL ends with /exec (not /dev)
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzaBsnwtsJIfpeamjx3x6S3P05pKQi8cr6WebxHWfm8J-iIZTk0pQP7JwdB9uqSHW46/exec';
+        // Your Google Apps Script deployment URL
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyFAGelbO1hkzQtdf9ouuclfmj4eN9CkHYSNbC9fJyz1fCL4UYOBA5n8IT-2HGszdhN/exec';
         
-        const response = await fetch(scriptUrl, {
-            method: 'POST',
-            mode: 'no-cors', // Add this line to handle CORS
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        });
+        // Create a hidden form for submission
+        const hiddenForm = document.createElement('form');
+        hiddenForm.action = scriptUrl;
+        hiddenForm.method = 'POST';
+        hiddenForm.style.display = 'none';
         
-        // Try to parse the response, but handle non-JSON responses
-        let result;
-        try {
-            result = await response.text();
-            result = result ? JSON.parse(result) : {};
-        } catch (e) {
-            result = { success: false, message: "Unexpected response format" };
+        // Add form data as hidden inputs
+        for (const key in formData) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = formData[key];
+            hiddenForm.appendChild(input);
         }
         
-        if (result.success || response.ok) {
-            alert('Message sent successfully!');
-            form.reset();
-        } else {
-            throw new Error(result.message || 'Failed to send message');
-        }
+        // Add the form to the page and submit it
+        document.body.appendChild(hiddenForm);
+        hiddenForm.submit();
+        
+        // Show success message
+        alert('Message sent successfully! We will get back to you soon.');
+        form.reset();
+        
     } catch (error) {
         console.error('Error:', error);
         alert('Error: ' + error.message);
     } finally {
+        // Reset button state
         submitButton.disabled = false;
         submitButton.innerHTML = originalButtonText;
     }
