@@ -1,4 +1,4 @@
-const CACHE_NAME = 'create-a-site-v2.20'; // Update version with each deployment
+const CACHE_NAME = 'create-a-site-v2.21'; // Update version with each deployment
 const urlsToCache = [
   '/',
   '/index.html',
