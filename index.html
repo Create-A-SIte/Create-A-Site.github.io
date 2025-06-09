@@ -160,14 +160,14 @@
                         <span class="text-xl font-bold text-gray-100">Create-A-Site</span>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="#" data-page="home" class="nav-link border-blue-500 text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                        <a href="#" data-page="home" class="nav-link border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
                         <a href="#" data-page="about" class="nav-link border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
                         <a href="#" data-page="contact" class="nav-link border-transparent text-gray-400 hover:border-gray-600 hover:text-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Contact</a>
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
                     <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
-                        Sign In
+                        Deploy
                     </button>
                 </div>
                 <div class="-mr-2 flex items-center sm:hidden">
@@ -182,13 +182,13 @@
         <!-- Mobile menu (unchanged) -->
         <div class="sm:hidden hidden" id="mobile-menu">
             <div class="pt-2 pb-3 space-y-1">
-                <a href="#" data-page="home" class="nav-link bg-dark-300 border-blue-500 text-blue-400 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Home</a>
+                <a href="#" data-page="home" class="nav-link border-transparent text-gray-400 hover:bg-dark-300 hover:border-gray-600 hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Home</a>
                 <a href="#" data-page="about" class="nav-link border-transparent text-gray-400 hover:bg-dark-300 hover:border-gray-600 hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">About</a>
                 <a href="#" data-page="contact" class="nav-link border-transparent text-gray-400 hover:bg-dark-300 hover:border-gray-600 hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Contact</a>
                 <div class="pt-4 pb-3 border-t border-gray-700">
                     <div class="flex items-center px-4">
                         <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium w-full transition duration-150 ease-in-out">
-                            Sign In
+                            Deploy
                         </button>
                     </div>
                 </div>
@@ -218,7 +218,7 @@
                         <div>
                             <label for="prompt" class="block text-sm font-medium text-gray-300 mb-1">Your Prompt</label>
                             <div class="mt-1 relative rounded-md shadow-sm">
-                                <textarea id="prompt" rows="3" class="bg-dark-300 border-gray-600 text-gray-200 focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm rounded-md p-3 border" placeholder="Describe the code you want to generate..."></textarea>
+                                <textarea id="prompt" rows="3" class="bg-dark-300 border-gray-600 text-gray-200 focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm rounded-md p-3 border resize-none" placeholder="Describe the code you want to generate..."></textarea>
                             </div>
                         </div>
                         <div class="flex justify-end">
@@ -320,6 +320,52 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Coming Soon Section -->
+            <div class="mt-12 pt-8 border-t border-dark-300">
+                <h3 class="text-xl font-semibold text-gray-100 mb-6">Coming Soon</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-dark-300 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-solid fa-wand-magic-sparkles text-blue-500 mr-3 text-xl"></i>
+                            <h4 class="font-medium text-gray-100">AI Debugging</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">
+                            Have AI models debug your code for you!
+                        </p>
+                    </div>
+                    <div class="bg-dark-300 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-brands fa-css3-alt text-blue-500 mr-3 text-xl"></i>
+                            <h4 class="font-medium text-gray-100">Custom CSS</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">
+                            We hope to provide CSS along with the html generated for you.
+                        </p>
+                    </div>
+                    <div class="bg-dark-300 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-plane-departure text-blue-500 mr-3 text-xl"></i>
+                            <h4 class="font-medium text-gray-100">Easy Deployment</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">
+                            Deploy your generated websites directly to popular hosting platforms with a single click.
+                        </p>
+                    </div>
+                    <div class="bg-dark-300 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-comments text-blue-500 mr-3 text-xl"></i>
+                            <h4 class="font-medium text-gray-100">AI Chat Support</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">
+                            Get real-time assistance from the AI models for any questions about your project.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-6 text-center">
+                    <p class="text-gray-400 italic">Stay tuned for these exciting new features coming soon!</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -361,7 +407,6 @@
         </div>
     </form>
 </div>
-
             <!-- Contact Information -->
             <div>
                 <h3 class="text-xl font-semibold text-gray-100 mb-4">Our Information</h3>
@@ -709,6 +754,5 @@ document.getElementById('contact-form').addEventListener('submit', async functio
     }
 });
 </script>
-</body>
 </body>
 </html>
