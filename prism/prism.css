@@ -1,9 +1,9 @@
-/* PrismJS 1.30.0 with Roboto Mono override */
+/* PrismJS 1.30.0 with VS Code-like styling */
 code[class*=language-],
 pre[class*=language-] {
-  color: #ccc;
+  color: #e2e8f0;
   background: 0 0;
-  font-family: 'Roboto Mono', monospace !important; /* Changed to Roboto Mono */
+  font-family: 'Roboto Mono', monospace !important;
   font-size: 1em;
   text-align: left;
   white-space: pre;
@@ -24,11 +24,12 @@ pre[class*=language-] {
   padding: 1em;
   margin: .5em 0;
   overflow: auto;
+  background: #1e1e1e !important;
 }
 
 :not(pre) > code[class*=language-],
 pre[class*=language-] {
-  background: #2d2d2d;
+  background: #1e1e1e;
 }
 
 :not(pre) > code[class*=language-] {
@@ -37,67 +38,62 @@ pre[class*=language-] {
   white-space: normal;
 }
 
-.token.block-comment,
-.token.cdata,
+/* VS Code-like syntax highlighting */
 .token.comment,
+.token.prolog,
 .token.doctype,
-.token.prolog {
-  color: #999;
+.token.cdata {
+  color: #6A9955;
 }
 
 .token.punctuation {
-  color: #ccc;
+  color: #808080;
 }
 
-.token.attr-name,
-.token.deleted,
-.token.namespace,
-.token.tag {
-  color: #e2777a;
-}
-
-.token.function-name {
-  color: #6196cc;
-}
-
-.token.boolean,
-.token.function,
-.token.number {
-  color: #f08d49;
-}
-
-.token.class-name,
-.token.constant,
 .token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
 .token.symbol {
-  color: #f8c555;
+  color: #B5CEA8;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin {
+  color: #CE9178;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+  color: #67CDCC;
 }
 
 .token.atrule,
-.token.builtin,
-.token.important,
-.token.keyword,
-.token.selector {
-  color: #cc99cd;
-}
-
 .token.attr-value,
-.token.char,
+.token.keyword {
+  color: #569CD6;
+}
+
+.token.function {
+  color: #DCDCAA;
+}
+
 .token.regex,
-.token.string,
-.token.variable {
-  color: #7ec699;
-}
-
-.token.entity,
-.token.operator,
-.token.url {
-  color: #67cdcc;
-}
-
-.token.bold,
 .token.important {
-  font-weight: 700;
+  color: #D16969;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
 }
 
 .token.italic {
@@ -108,16 +104,11 @@ pre[class*=language-] {
   cursor: help;
 }
 
-.token.inserted {
-  color: green;
-}
-
-/* Line numbers with Roboto Mono */
+/* Line numbers */
 pre[class*=language-].line-numbers {
   position: relative;
   padding-left: 3.8em;
   counter-reset: linenumber;
-  font-family: 'Roboto Mono', monospace !important; /* Added for line numbers */
 }
 
 pre[class*=language-].line-numbers > code {
@@ -133,12 +124,11 @@ pre[class*=language-].line-numbers > code {
   left: -3.8em;
   width: 3em;
   letter-spacing: -1px;
-  border-right: 1px solid #999;
+  border-right: 1px solid #404040;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  font-family: 'Roboto Mono', monospace !important; /* Added for line numbers */
 }
 
 .line-numbers-rows > span {
@@ -148,9 +138,28 @@ pre[class*=language-].line-numbers > code {
 
 .line-numbers-rows > span:before {
   content: counter(linenumber);
-  color: #999;
+  color: #858585;
   display: block;
-  padding-right: .8em;
+  padding-right: 0.8em;
   text-align: right;
+  font-size: 0.875rem;
 }
-</style>
+
+/* Selection styling */
+pre[class*=language-]::selection,
+pre[class*=language-] ::selection,
+code[class*=language-]::selection,
+code[class*=language-] ::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: inherit;
+}
+
+/* Active line highlighting */
+.line-numbers-rows > span.active {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Cursor styling */
+pre[class*=language-] {
+  caret-color: #fff;
+}
