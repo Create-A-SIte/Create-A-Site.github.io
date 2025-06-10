@@ -231,7 +231,9 @@
         #file-explorer.collapsed .fa-ellipsis-v,
         #file-explorer.collapsed .text-sm.font-medium,
         #file-explorer.collapsed .file-explorer-item span,
-        #file-explorer.collapsed .file-item span {
+        #file-explorer.collapsed .file-item span,
+        #file-explorer.collapsed .file-explorer-item > div,
+        #file-explorer.collapsed .file-item {
             display: none;
         }
 
@@ -903,6 +905,10 @@
         const navLinks = document.querySelectorAll('.nav-link');
         const pages = document.querySelectorAll('.page');
         
+        // Set home page as active by default
+        document.querySelector('[data-page="home"]').classList.add('border-blue-500', 'text-gray-100');
+        document.getElementById('home-page').classList.add('active');
+        
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -1294,11 +1300,11 @@
         });
 
         // Toggle folders
-        document.querySelectorAll('.folder-toggle, .file-explorer-item > div').forEach(element => {
-            element.addEventListener('click', (e) => {
+        document.querySelectorAll('.folder-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const folderItem = e.target.closest('.file-explorer-item');
                 const folderContent = folderItem.querySelector('.folder-content');
-                const toggle = folderItem.querySelector('.folder-toggle');
                 
                 if (folderContent) {
                     folderContent.classList.toggle('hidden');
@@ -1306,6 +1312,15 @@
                     toggle.classList.toggle('fa-chevron-down');
                 }
             });
+        });
+
+        // Make all folders closed by default
+        document.querySelectorAll('.folder-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        document.querySelectorAll('.folder-toggle').forEach(toggle => {
+            toggle.classList.remove('fa-chevron-down');
+            toggle.classList.add('fa-chevron-right');
         });
 
         // Folder renaming functionality
