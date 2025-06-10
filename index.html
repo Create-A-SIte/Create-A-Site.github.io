@@ -229,12 +229,31 @@
         #file-explorer.collapsed .folder-content,
         #file-explorer.collapsed span:not(.text-sm),
         #file-explorer.collapsed .fa-ellipsis-v,
-        #file-explorer.collapsed .text-sm.font-medium {
+        #file-explorer.collapsed .text-sm.font-medium,
+        #file-explorer.collapsed .file-explorer-item span,
+        #file-explorer.collapsed .file-item span {
             display: none;
         }
 
         #file-explorer.collapsed .fa-chevron-left {
             transform: rotate(180deg);
+        }
+
+        /* Folder renaming styles */
+        .folder-name {
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        .folder-name:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .folder-name.editing {
+            background-color: #2d2d2d;
+            border: 1px solid #3b82f6;
+            outline: none;
         }
 
         /* File content styles */
@@ -1275,16 +1294,59 @@
         });
 
         // Toggle folders
-        document.querySelectorAll('.folder-toggle').forEach(toggle => {
-            toggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const folderContent = e.target.closest('.file-explorer-item').querySelector('.folder-content');
+        document.querySelectorAll('.folder-toggle, .file-explorer-item > div').forEach(element => {
+            element.addEventListener('click', (e) => {
+                const folderItem = e.target.closest('.file-explorer-item');
+                const folderContent = folderItem.querySelector('.folder-content');
+                const toggle = folderItem.querySelector('.folder-toggle');
+                
                 if (folderContent) {
                     folderContent.classList.toggle('hidden');
                     toggle.classList.toggle('fa-chevron-right');
                     toggle.classList.toggle('fa-chevron-down');
                 }
             });
+        });
+
+        // Folder renaming functionality
+        document.querySelectorAll('.file-explorer-item').forEach(folder => {
+            const folderName = folder.querySelector('.text-sm');
+            if (folderName) {
+                folderName.classList.add('folder-name');
+                
+                folderName.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    const currentName = folderName.textContent;
+                    folderName.contentEditable = true;
+                    folderName.classList.add('editing');
+                    folderName.focus();
+                    
+                    // Select all text
+                    const range = document.createRange();
+                    range.selectNodeContents(folderName);
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    
+                    // Handle blur and enter key
+                    const handleRename = () => {
+                        folderName.contentEditable = false;
+                        folderName.classList.remove('editing');
+                        const newName = folderName.textContent.trim();
+                        if (!newName) {
+                            folderName.textContent = currentName;
+                        }
+                    };
+                    
+                    folderName.addEventListener('blur', handleRename, { once: true });
+                    folderName.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleRename();
+                        }
+                    });
+                });
+            }
         });
 
         // File selection and editing
