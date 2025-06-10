@@ -1484,7 +1484,8 @@
         });
 
         // Context menu logic for file explorer
-        
+        const contextMenu = document.getElementById('context-menu');
+        let contextTarget = null;
 
         // Hide context menu on click elsewhere
         window.addEventListener('click', () => {
