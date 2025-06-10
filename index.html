@@ -1747,5 +1747,48 @@ document.getElementById('contact-form').addEventListener('submit', async functio
   <div class="context-menu-item" data-action="delete" style="padding:8px 16px; cursor:pointer;">Delete</div>
   <div class="context-menu-item" data-action="add-file" style="padding:8px 16px; cursor:pointer; display:none;">Add File</div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // NAVIGATION
+  const navLinks = document.querySelectorAll('.nav-link');
+  const pages = document.querySelectorAll('.page');
+  // Set home page as active by default
+  navLinks.forEach(nav => nav.classList.remove('border-blue-500', 'text-gray-100'));
+  document.querySelector('[data-page="home"]').classList.add('border-blue-500', 'text-gray-100');
+  pages.forEach(page => page.classList.remove('active'));
+  document.getElementById('home-page').classList.add('active');
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const pageId = this.getAttribute('data-page');
+      navLinks.forEach(nav => nav.classList.remove('border-blue-500', 'text-gray-100'));
+      this.classList.add('border-blue-500', 'text-gray-100');
+      pages.forEach(page => page.classList.remove('active'));
+      document.getElementById(`${pageId}-page`).classList.add('active');
+      document.getElementById('mobile-menu').classList.add('hidden');
+    });
+  });
+
+  // FOLDERS START CLOSED & COLLAPSIBLE
+  document.querySelectorAll('.folder-content').forEach(content => {
+    content.classList.add('hidden');
+  });
+  document.querySelectorAll('.folder-toggle').forEach(toggle => {
+    toggle.classList.remove('fa-chevron-down');
+    toggle.classList.add('fa-chevron-right');
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const folderItem = e.target.closest('.file-explorer-item');
+      const folderContent = folderItem.querySelector('.folder-content');
+      if (folderContent) {
+        folderContent.classList.toggle('hidden');
+        toggle.classList.toggle('fa-chevron-right');
+        toggle.classList.toggle('fa-chevron-down');
+      }
+    });
+  });
+});
+</script>
 </body>
 </html>
