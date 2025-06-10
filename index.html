@@ -1633,6 +1633,47 @@
             // openFolderMenu(folderItem); // Example: your menu function
           }
         });
+
+        // ... existing code ...
+        document.addEventListener('DOMContentLoaded', function() {
+          // Ensure all folders start closed
+          document.querySelectorAll('.folder-content').forEach(content => {
+            content.classList.add('hidden');
+          });
+
+          // Robust right-click context menu logic
+          const fileExplorer = document.getElementById('file-explorer');
+          const contextMenu = document.getElementById('context-menu');
+          let contextTarget = null;
+
+          fileExplorer.addEventListener('contextmenu', function(e) {
+            const fileItem = e.target.closest('.file-item');
+            const folderItem = e.target.closest('.file-explorer-item > .flex');
+            if (fileItem || folderItem) {
+              e.preventDefault();
+              contextTarget = fileItem || folderItem;
+              contextMenu.style.top = e.clientY + 'px';
+              contextMenu.style.left = e.clientX + 'px';
+              contextMenu.style.display = 'block';
+              contextMenu.querySelector('[data-action="add-file"]').style.display = folderItem ? 'block' : 'none';
+            } else {
+              contextMenu.style.display = 'none';
+            }
+          });
+
+          // Hide menu on click elsewhere
+          window.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+          });
+
+          // If you dynamically add folders, also add 'hidden' to their .folder-content
+          window.addEventListener('add-folder', function(e) {
+            // e.detail should be the new folder element
+            const folderContent = e.detail.querySelector('.folder-content');
+            if (folderContent) folderContent.classList.add('hidden');
+          });
+        });
+        // ... existing code ...
     </script>
     <script>
 document.getElementById('contact-form').addEventListener('submit', async function(e) {
