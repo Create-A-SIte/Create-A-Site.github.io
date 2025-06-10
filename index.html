@@ -251,7 +251,7 @@
         }
 
         .folder-name:hover, .file-name:hover {
-            background-color: rgba(59, 130, 246, 0.1);
+            background-color: transparent !important;
         }
 
         .folder-name.editing, .file-name.editing {
@@ -1598,6 +1598,23 @@
             e.preventDefault();
           }
         };
+
+        // Remove previous attachContextMenuHandlers and instead use event delegation:
+        contextTarget = null;
+        fileExplorer.addEventListener('contextmenu', function(e) {
+          const fileItem = e.target.closest('.file-item');
+          const folderItem = e.target.closest('.file-explorer-item > .flex');
+          if (fileItem || folderItem) {
+            e.preventDefault();
+            contextTarget = fileItem || folderItem;
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.display = 'block';
+            contextMenu.querySelector('[data-action="add-file"]').style.display = folderItem ? 'block' : 'none';
+          } else {
+            contextMenu.style.display = 'none';
+          }
+        });
     </script>
     <script>
 document.getElementById('contact-form').addEventListener('submit', async function(e) {
