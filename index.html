@@ -62,7 +62,7 @@
             background-color: #2d2d2d !important;
             border-radius: 0.375rem;
             overflow: auto;
-            white-space: pre !important;
+            text-align: left;
             margin: 0;
             padding: 1rem !important;
             position: relative;
@@ -1599,6 +1599,115 @@
             toggle.classList.remove('fa-chevron-down');
             toggle.classList.add('fa-chevron-right');
         });
+
+        // Context menu logic for file explorer
+        const contextMenu = document.getElementById('context-menu');
+        let contextTarget = null;
+
+        // Hide context menu on click elsewhere
+        window.addEventListener('click', () => {
+          contextMenu.style.display = 'none';
+        });
+
+        // Prevent default context menu and show custom one
+        function showContextMenu(e, isFolder) {
+          e.preventDefault();
+          contextTarget = e.currentTarget;
+          // Position menu
+          contextMenu.style.top = e.clientY + 'px';
+          contextMenu.style.left = e.clientX + 'px';
+          contextMenu.style.display = 'block';
+          // Show/hide Add File
+          contextMenu.querySelector('[data-action="add-file"]').style.display = isFolder ? 'block' : 'none';
+        }
+
+        // Attach right-click to file and folder items
+        function attachContextMenuHandlers() {
+          // For files
+          document.querySelectorAll('.file-item').forEach(item => {
+            item.oncontextmenu = (e) => showContextMenu(e, false);
+            // Prevent double-click rename
+            item.ondblclick = (e) => e.preventDefault();
+          });
+          // For folders
+          document.querySelectorAll('.file-explorer-item > .flex').forEach(item => {
+            item.oncontextmenu = (e) => showContextMenu(e, true);
+            item.ondblclick = (e) => e.preventDefault();
+          });
+        }
+        attachContextMenuHandlers();
+
+        // Handle context menu actions
+        contextMenu.addEventListener('click', function(e) {
+          if (!e.target.classList.contains('context-menu-item')) return;
+          const action = e.target.getAttribute('data-action');
+          if (!contextTarget) return;
+
+          if (action === 'rename') {
+            // For files or folders
+            const nameSpan = contextTarget.querySelector('.file-name, .folder-name');
+            if (nameSpan) {
+              nameSpan.contentEditable = true;
+              nameSpan.classList.add('editing');
+              nameSpan.focus();
+              // Select all text
+              const range = document.createRange();
+              range.selectNodeContents(nameSpan);
+              const selection = window.getSelection();
+              selection.removeAllRanges();
+              selection.addRange(range);
+              // Handle blur/enter
+              const handleRename = () => {
+                nameSpan.contentEditable = false;
+                nameSpan.classList.remove('editing');
+                if (!nameSpan.textContent.trim()) nameSpan.textContent = 'untitled';
+              };
+              nameSpan.addEventListener('blur', handleRename, { once: true });
+              nameSpan.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleRename();
+                }
+              });
+            }
+          } else if (action === 'delete') {
+            // For files or folders
+            if (contextTarget.classList.contains('file-item')) {
+              if (confirm('Delete this file?')) contextTarget.remove();
+            } else if (contextTarget.classList.contains('flex')) {
+              const folder = contextTarget.closest('.file-explorer-item');
+              if (folder && confirm('Delete this folder and all its contents?')) folder.remove();
+            }
+          } else if (action === 'add-file') {
+            // Only for folders
+            const folder = contextTarget.closest('.file-explorer-item');
+            const folderContent = folder.querySelector('.folder-content');
+            const fileName = prompt('Enter file name (include extension):');
+            if (fileName) {
+              // Use existing addNewFile if available
+              if (typeof addNewFile === 'function') {
+                addNewFile(folderContent, fileName);
+              } else {
+                // Fallback: add a simple file item
+                const div = document.createElement('div');
+                div.className = 'flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item';
+                div.setAttribute('data-file', fileName);
+                div.innerHTML = `<i class='fas fa-file text-gray-400 mr-2'></i><span class='text-sm file-name'>${fileName}</span><div class='file-actions'><button class='delete-file' title='Delete file'><i class='fas fa-trash'></i></button></div>`;
+                folderContent.appendChild(div);
+                attachContextMenuHandlers();
+              }
+            }
+          }
+          contextMenu.style.display = 'none';
+        });
+
+        // Prevent default context menu in explorer
+        fileExplorer.oncontextmenu = (e) => {
+          if (!e.target.closest('.file-item, .file-explorer-item > .flex')) {
+            contextMenu.style.display = 'none';
+            e.preventDefault();
+          }
+        };
     </script>
     <script>
 document.getElementById('contact-form').addEventListener('submit', async function(e) {
@@ -1665,5 +1774,12 @@ document.getElementById('contact-form').addEventListener('submit', async functio
     }
 });
 </script>
+
+<!-- Custom Context Menu for File Explorer -->
+<div id="context-menu" style="display:none; position:absolute; z-index:2000; min-width:140px; background:#23272a; color:#fff; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); font-size:14px; overflow:hidden;">
+  <div class="context-menu-item" data-action="rename" style="padding:8px 16px; cursor:pointer;">Rename</div>
+  <div class="context-menu-item" data-action="delete" style="padding:8px 16px; cursor:pointer;">Delete</div>
+  <div class="context-menu-item" data-action="add-file" style="padding:8px 16px; cursor:pointer; display:none;">Add File</div>
+</div>
 </body>
 </html>
