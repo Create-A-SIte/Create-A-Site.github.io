@@ -473,18 +473,11 @@
                 <div class="flex flex-col md:flex-row">
                     <!-- File Explorer Sidebar -->
                     <div id="file-explorer" class="w-64 bg-dark-200 border-r border-gray-700 hidden md:block transition-all duration-300">
-                        <div class="p-2 border-b border-gray-700">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-300">EXPLORER</span>
-                                <div class="flex items-center space-x-2">
-                                    <button id="collapse-explorer" class="text-gray-400 hover:text-gray-200">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </button>
-                                    <button class="text-gray-400 hover:text-gray-200">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="p-2 border-b border-gray-700 flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-300">EXPLORER</span>
+                            <button id="new-root-file-btn" class="text-gray-400 hover:text-gray-200 px-2 py-1 rounded bg-dark-300 ml-2" title="Create New File">
+                              <i class="fas fa-plus"></i> New File
+                            </button>
                         </div>
                         <div class="search-container">
                             <input type="text" class="search-input" placeholder="Search files...">
@@ -1491,8 +1484,7 @@
         });
 
         // Context menu logic for file explorer
-        const contextMenu = document.getElementById('context-menu');
-        let contextTarget = null;
+        
 
         // Hide context menu on click elsewhere
         window.addEventListener('click', () => {
@@ -1674,6 +1666,73 @@
           });
         });
         // ... existing code ...
+
+        // New File button for root
+        const newRootFileBtn = document.getElementById('new-root-file-btn');
+        if (newRootFileBtn) {
+          newRootFileBtn.addEventListener('click', function() {
+            const rootFolderContent = document.querySelector('.file-explorer-item > .folder-content');
+            const fileName = prompt('Enter file name (include extension):');
+            if (fileName && rootFolderContent) {
+              const div = document.createElement('div');
+              div.className = 'flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item';
+              div.setAttribute('data-file', fileName);
+              div.innerHTML = `<i class='fas fa-file text-gray-400 mr-2'></i><span class='text-sm file-name'>${fileName}</span>`;
+              rootFolderContent.appendChild(div);
+            }
+          });
+        }
+
+        // Update context menu logic for right-click in empty explorer space
+        const fileExplorer = document.getElementById('file-explorer');
+        const contextMenu = document.getElementById('context-menu');
+        let contextTarget = null;
+        fileExplorer.addEventListener('contextmenu', function(e) {
+          const fileItem = e.target.closest('.file-item');
+          const folderItem = e.target.closest('.file-explorer-item > .flex');
+          // If right-click on empty space in explorer
+          if (!fileItem && !folderItem && e.target === fileExplorer) {
+            e.preventDefault();
+            contextTarget = null;
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.display = 'block';
+            contextMenu.querySelector('[data-action="add-file"]').style.display = 'block';
+            contextMenu.querySelector('[data-action="rename"]').style.display = 'none';
+            contextMenu.querySelector('[data-action="delete"]').style.display = 'none';
+          } else if (fileItem || folderItem) {
+            e.preventDefault();
+            contextTarget = fileItem || folderItem;
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.display = 'block';
+            contextMenu.querySelector('[data-action="add-file"]').style.display = folderItem ? 'block' : 'none';
+            contextMenu.querySelector('[data-action="rename"]').style.display = 'block';
+            contextMenu.querySelector('[data-action="delete"]').style.display = 'block';
+          } else {
+            contextMenu.style.display = 'none';
+          }
+        });
+        contextMenu.addEventListener('click', function(e) {
+          if (!e.target.classList.contains('context-menu-item')) return;
+          const action = e.target.getAttribute('data-action');
+          // Add file to root if contextTarget is null
+          if (action === 'add-file' && !contextTarget) {
+            const rootFolderContent = document.querySelector('.file-explorer-item > .folder-content');
+            const fileName = prompt('Enter file name (include extension):');
+            if (fileName && rootFolderContent) {
+              const div = document.createElement('div');
+              div.className = 'flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item';
+              div.setAttribute('data-file', fileName);
+              div.innerHTML = `<i class='fas fa-file text-gray-400 mr-2'></i><span class='text-sm file-name'>${fileName}</span>`;
+              rootFolderContent.appendChild(div);
+            }
+            contextMenu.style.display = 'none';
+            return;
+          }
+          // ... existing code for context menu actions ...
+        });
+        // ... existing code ...
     </script>
     <script>
 document.getElementById('contact-form').addEventListener('submit', async function(e) {
@@ -1750,187 +1809,30 @@ document.getElementById('contact-form').addEventListener('submit', async functio
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // NAVIGATION
-  const navLinks = document.querySelectorAll('.nav-link');
-  const pages = document.querySelectorAll('.page');
-  navLinks.forEach(nav => nav.classList.remove('border-blue-500', 'text-gray-100'));
-  document.querySelector('[data-page="home"]').classList.add('border-blue-500', 'text-gray-100');
-  pages.forEach(page => page.classList.remove('active'));
-  document.getElementById('home-page').classList.add('active');
-  navLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      const pageId = this.getAttribute('data-page');
-      navLinks.forEach(nav => nav.classList.remove('border-blue-500', 'text-gray-100'));
-      this.classList.add('border-blue-500', 'text-gray-100');
-      pages.forEach(page => page.classList.remove('active'));
-      document.getElementById(`${pageId}-page`).classList.add('active');
-      document.getElementById('mobile-menu').classList.add('hidden');
-    });
-  });
-
-  // FOLDERS START CLOSED & COLLAPSIBLE
-  document.querySelectorAll('.folder-content').forEach(content => {
-    content.classList.add('hidden');
-  });
-  document.querySelectorAll('.folder-toggle').forEach(toggle => {
-    toggle.classList.remove('fa-chevron-down');
-    toggle.classList.add('fa-chevron-right');
-    toggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const folderItem = e.target.closest('.file-explorer-item');
-      const folderContent = folderItem.querySelector('.folder-content');
-      if (folderContent) {
-        folderContent.classList.toggle('hidden');
-        toggle.classList.toggle('fa-chevron-right');
-        toggle.classList.toggle('fa-chevron-down');
-      }
-    });
-  });
-
-  // EXPLORER COLLAPSE/EXPAND
-  const fileExplorer = document.getElementById('file-explorer');
-  const collapseExplorer = document.getElementById('collapse-explorer');
-  if (collapseExplorer && fileExplorer) {
-    collapseExplorer.addEventListener('click', function() {
-      fileExplorer.classList.toggle('collapsed');
-      collapseExplorer.style.display = 'block';
-    });
-  }
-
-  // LOGIN MODAL
-  const loginButton = document.getElementById('login-button');
-  const mobileLoginButton = document.getElementById('mobile-login-button');
-  const loginModal = document.getElementById('login-modal');
-  const closeLoginModal = document.getElementById('close-login-modal');
-  if (loginButton && loginModal && closeLoginModal) {
-    function openLoginModal() {
-      loginModal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeLoginModalFunc() {
-      loginModal.classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-    loginButton.addEventListener('click', openLoginModal);
-    if (mobileLoginButton) mobileLoginButton.addEventListener('click', openLoginModal);
-    closeLoginModal.addEventListener('click', closeLoginModalFunc);
-  }
-
-  // DEPLOY MODAL & OPTIONS
-  const deployButton = document.querySelector('button.bg-blue-600');
-  const deployModal = document.getElementById('deploy-modal');
-  const closeDeployModal = document.getElementById('close-deploy-modal');
-  const deployOptions = document.querySelectorAll('.deploy-option');
-  const deployInstructions = document.getElementById('deploy-instructions');
-  const deploySteps = document.getElementById('deploy-steps');
-  const codeEditor = document.getElementById('code-editor');
-  if (deployButton && deployModal && closeDeployModal) {
-    deployButton.addEventListener('click', () => {
-      deployModal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    });
-    closeDeployModal.addEventListener('click', () => {
-      deployModal.classList.add('hidden');
-      document.body.style.overflow = '';
-      if (deployInstructions) deployInstructions.classList.add('hidden');
-    });
-    const guides = {
-      github: [
-        '1. Create a new repository on GitHub',
-        '2. Initialize git in your project folder:',
-        '   git init',
-        '3. Add your files:',
-        '   git add .',
-        '4. Commit your changes:',
-        '   git commit -m "Initial commit"',
-        '5. Add your repository as remote:',
-        '   git remote add origin YOUR_REPO_URL',
-        '6. Push to GitHub:',
-        '   git push -u origin main',
-        '7. Go to repository settings > Pages',
-        '8. Select main branch as source'
-      ],
-      vercel: [
-        '1. Install Vercel CLI:',
-        '   npm i -g vercel',
-        '2. Login to Vercel:',
-        '   vercel login',
-        '3. Deploy your site:',
-        '   vercel'
-      ],
-      netlify: [
-        '1. Install Netlify CLI:',
-        '   npm install netlify-cli -g',
-        '2. Login to Netlify:',
-        '   netlify login',
-        '3. Initialize your site:',
-        '   netlify init',
-        '4. Deploy your site:',
-        '   netlify deploy --prod'
-      ],
-      cloudflare: [
-        '1. Install Wrangler CLI:',
-        '   npm install -g wrangler',
-        '2. Login to Cloudflare:',
-        '   wrangler login',
-        '3. Initialize your project:',
-        '   wrangler init',
-        '4. Deploy your site:',
-        '   wrangler publish'
-      ],
-      surge: [
-        '1. Install Surge CLI:',
-        '   npm install -g surge',
-        '2. Login to Surge:',
-        '   surge login',
-        '3. Deploy your site:',
-        '   surge'
-      ],
-      firebase: [
-        '1. Install Firebase CLI:',
-        '   npm install -g firebase-tools',
-        '2. Login to Firebase:',
-        '   firebase login',
-        '3. Initialize your project:',
-        '   firebase init',
-        '4. Deploy your site:',
-        '   firebase deploy'
-      ]
-    };
-    const deployLinks = {
-      github: 'https://github.com/new',
-      vercel: 'https://vercel.com/new',
-      netlify: 'https://app.netlify.com/start',
-      cloudflare: 'https://dash.cloudflare.com/sign-up',
-      surge: 'https://surge.sh/',
-      firebase: 'https://console.firebase.google.com/'
-    };
-    deployOptions.forEach(option => {
-      option.addEventListener('click', async () => {
-        const platform = option.dataset.platform;
-        // Download code as index.html
-        const blob = new Blob([codeEditor.textContent], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'index.html';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        // Open deploy site
-        window.open(deployLinks[platform], '_blank');
-        // Show instructions
-        deploySteps.innerHTML = guides[platform].map(step => `<p>${step}</p>`).join('');
-        deployInstructions.classList.remove('hidden');
-      });
-    });
-  }
-
-  // RIGHT-CLICK CONTEXT MENU FOR FILES/FOLDERS
+  // ... existing code ...
+  // Declare contextMenu and contextTarget ONCE here
   const contextMenu = document.getElementById('context-menu');
   let contextTarget = null;
+
+  // ... all other code that uses contextMenu and contextTarget ...
+  // Remove any other declarations of these variables below
+
+  // New File button for root
+  const newRootFileBtn = document.getElementById('new-root-file-btn');
+  if (newRootFileBtn) {
+    newRootFileBtn.addEventListener('click', function() {
+      const rootFolderContent = document.querySelector('.file-explorer-item > .folder-content');
+      const fileName = prompt('Enter file name (include extension):');
+      if (fileName && rootFolderContent) {
+        const div = document.createElement('div');
+        div.className = 'flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item';
+        div.setAttribute('data-file', fileName);
+        div.innerHTML = `<i class='fas fa-file text-gray-400 mr-2'></i><span class='text-sm file-name'>${fileName}</span>`;
+        rootFolderContent.appendChild(div);
+      }
+    });
+  }
+
   fileExplorer.addEventListener('contextmenu', function(e) {
     const fileItem = e.target.closest('.file-item');
     const folderItem = e.target.closest('.file-explorer-item > .flex');
