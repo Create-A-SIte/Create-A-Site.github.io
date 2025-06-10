@@ -65,21 +65,54 @@
             white-space: pre !important;
             margin: 0;
             padding: 1rem !important;
+            position: relative;
         }
         
-        /* PRISM CHANGE 2: Added line number alignment fix */
-        .line-numbers .line-numbers-rows {
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-            border-right: 1px solid #4a4a4a;
-        }
-        
-        /* Rest of your existing styles remain unchanged */
-        #code-editor[contenteditable="true"] {
+        .code-editor:focus {
             outline: none;
-            caret-color: #fff;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
         }
         
+        .code-editor::selection {
+            background-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        /* VS Code-like line numbers */
+        .line-numbers {
+            counter-reset: line;
+            padding-left: 3.5rem !important;
+        }
+        
+        .line-numbers > span {
+            display: block;
+            position: relative;
+        }
+        
+        .line-numbers > span:before {
+            counter-increment: line;
+            content: counter(line);
+            position: absolute;
+            left: -3.5rem;
+            width: 2.5rem;
+            text-align: right;
+            color: #6b7280;
+            font-size: 0.875rem;
+            padding-right: 1rem;
+            user-select: none;
+        }
+        
+        /* Syntax highlighting colors */
+        .token.comment { color: #6A9955; }
+        .token.string { color: #CE9178; }
+        .token.number { color: #B5CEA8; }
+        .token.keyword { color: #569CD6; }
+        .token.function { color: #DCDCAA; }
+        .token.tag { color: #569CD6; }
+        .token.attr-name { color: #9CDCFE; }
+        .token.attr-value { color: #CE9178; }
+        .token.punctuation { color: #808080; }
+        
+        /* Rest of your existing styles */
         .output-frame {
             min-height: 300px;
             background-color: white;
@@ -147,6 +180,89 @@
             cursor: pointer;
             z-index: 1001;
         }
+
+        /* File Explorer Styles */
+        .file-explorer-item {
+            position: relative;
+        }
+
+        .file-explorer-item:hover .file-actions {
+            display: flex;
+        }
+
+        .file-actions {
+            display: none;
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #2d2d2d;
+            border-radius: 0.25rem;
+            padding: 0.25rem;
+        }
+
+        .file-actions button {
+            padding: 0.25rem;
+            color: #9ca3af;
+        }
+
+        .file-actions button:hover {
+            color: #e5e7eb;
+        }
+
+        /* Active file indicator */
+        .file-explorer-item.active,
+        .file-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .file-explorer-item.active .text-gray-300,
+        .file-item.active .text-gray-300 {
+            color: #3b82f6;
+        }
+
+        /* Collapsed state */
+        #file-explorer.collapsed {
+            width: 48px;
+        }
+
+        #file-explorer.collapsed .folder-content,
+        #file-explorer.collapsed span:not(.text-sm),
+        #file-explorer.collapsed .fa-ellipsis-v {
+            display: none;
+        }
+
+        #file-explorer.collapsed .fa-chevron-left {
+            transform: rotate(180deg);
+        }
+
+        /* File content styles */
+        .file-content {
+            display: none;
+            padding: 1rem;
+            background: #1e1e1e;
+            border-radius: 0.375rem;
+            margin-top: 0.5rem;
+        }
+
+        .file-content.active {
+            display: block;
+        }
+
+        .file-content textarea {
+            width: 100%;
+            min-height: 200px;
+            background: #1e1e1e;
+            color: #e2e8f0;
+            border: none;
+            font-family: 'Roboto Mono', monospace;
+            padding: 0.5rem;
+            resize: vertical;
+        }
+
+        .file-content textarea:focus {
+            outline: none;
+        }
     </style>
 </head>
 <body class="dark bg-dark-100 text-gray-200 min-h-screen">
@@ -166,6 +282,9 @@
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <button id="login-button" class="bg-dark-300 hover:bg-dark-400 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out mr-2">
+                        <i class="fas fa-user mr-2"></i>Login
+                    </button>
                     <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
                         Deploy
                     </button>
@@ -187,8 +306,43 @@
                 <a href="#" data-page="contact" class="nav-link border-transparent text-gray-400 hover:bg-dark-300 hover:border-gray-600 hover:text-gray-300 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Contact</a>
                 <div class="pt-4 pb-3 border-t border-gray-700">
                     <div class="flex items-center px-4">
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium w-full transition duration-150 ease-in-out">
+                        <button id="mobile-login-button" class="bg-dark-300 hover:bg-dark-400 text-white px-4 py-2 rounded-md text-sm font-medium w-full transition duration-150 ease-in-out mb-2">
+                            <i class="fas fa-user mr-2"></i>Login
+                        </button>
+                    </div>
+                    <div class="flex items-center px-4">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium w-full transition duration-150 ease-in-out" id="mobile-deploy-button">
                             Deploy
+                        </button>
+                    </div>
+                    <div id="mobile-deploy-options" class="mt-4 px-4 grid grid-cols-2 gap-2 hidden">
+                        <button class="deploy-option bg-dark-300 p-3 rounded-lg hover:bg-dark-400 transition-colors" data-platform="github">
+                            <i class="fab fa-github text-xl mb-1 text-blue-500"></i>
+                            <span class="block text-xs">GitHub</span>
+                        </button>
+                        <button class="deploy-option bg-dark-300 p-3 rounded-lg hover:bg-dark-400 transition-colors" data-platform="vercel">
+                            <svg class="w-6 h-6 mb-1 mx-auto" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="#3B82F6"/>
+                            </svg>
+                            <span class="block text-xs">Vercel</span>
+                        </button>
+                        <button class="deploy-option bg-dark-300 p-3 rounded-lg hover:bg-dark-400 transition-colors" data-platform="netlify">
+                            <svg class="w-6 h-6 mb-1 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 0L24 24H0L12 0Z" fill="#3B82F6"/>
+                            </svg>
+                            <span class="block text-xs">Netlify</span>
+                        </button>
+                        <button class="deploy-option bg-dark-300 p-3 rounded-lg hover:bg-dark-400 transition-colors" data-platform="cloudflare">
+                            <i class="fas fa-cloud text-xl mb-1 text-blue-500"></i>
+                            <span class="block text-xs">Cloudflare</span>
+                        </button>
+                        <button class="deploy-option bg-dark-300 p-3 rounded-lg hover:bg-dark-400 transition-colors" data-platform="surge">
+                            <i class="fas fa-bolt text-xl mb-1 text-blue-500"></i>
+                            <span class="block text-xs">Surge</span>
+                        </button>
+                        <button class="deploy-option bg-dark-300 p-3 rounded-lg hover:bg-dark-400 transition-colors" data-platform="firebase">
+                            <i class="fas fa-fire text-xl mb-1 text-blue-500"></i>
+                            <span class="block text-xs">Firebase</span>
                         </button>
                     </div>
                 </div>
@@ -231,37 +385,132 @@
 
                 <!-- Code and Output Sections -->
                 <div class="flex flex-col md:flex-row">
-                    <!-- PRISM CHANGE 3: Added line-numbers class to editor -->
-                    <div class="w-full md:w-1/2 p-4 border-r border-gray-700">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-medium text-gray-300">HTML</span>
-                            <div class="flex space-x-2">
-                                <button id="copy-button" class="text-gray-400 hover:text-gray-200">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                                <button id="download-button" class="text-gray-400 hover:text-gray-200">
-                                    <i class="fas fa-download"></i>
-                                </button>
+                    <!-- File Explorer Sidebar -->
+                    <div id="file-explorer" class="w-64 bg-dark-200 border-r border-gray-700 hidden md:block transition-all duration-300">
+                        <div class="p-2 border-b border-gray-700">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-300">EXPLORER</span>
+                                <div class="flex items-center space-x-2">
+                                    <button id="collapse-explorer" class="text-gray-400 hover:text-gray-200">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-gray-200">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <pre id="code-editor" class="code-editor line-numbers language-html bg-dark-300 rounded-md overflow-auto" contenteditable="true"><!-- Generated code will appear here --></pre>
+                        <div class="p-2">
+                            <div class="space-y-1">
+                                <!-- Project Root -->
+                                <div class="file-explorer-item">
+                                    <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer">
+                                        <i class="fas fa-chevron-down text-xs mr-1 folder-toggle"></i>
+                                        <i class="fas fa-folder text-yellow-500 mr-2"></i>
+                                        <span class="text-sm">my-project</span>
+                                    </div>
+                                    <!-- Project Files -->
+                                    <div class="ml-4 mt-1 space-y-1 folder-content">
+                                        <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="index.html">
+                                            <i class="fab fa-html5 text-orange-500 mr-2"></i>
+                                            <span class="text-sm">index.html</span>
+                                        </div>
+                                        <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="styles.css">
+                                            <i class="fab fa-css3-alt text-blue-500 mr-2"></i>
+                                            <span class="text-sm">styles.css</span>
+                                        </div>
+                                        <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="script.js">
+                                            <i class="fab fa-js text-yellow-400 mr-2"></i>
+                                            <span class="text-sm">script.js</span>
+                                        </div>
+                                        <div class="file-explorer-item">
+                                            <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer">
+                                                <i class="fas fa-chevron-right text-xs mr-1 folder-toggle"></i>
+                                                <i class="fas fa-folder text-yellow-500 mr-2"></i>
+                                                <span class="text-sm">assets</span>
+                                            </div>
+                                            <div class="ml-4 mt-1 space-y-1 folder-content hidden">
+                                                <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="logo.png">
+                                                    <i class="fas fa-image text-green-500 mr-2"></i>
+                                                    <span class="text-sm">logo.png</span>
+                                                </div>
+                                                <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="background.jpg">
+                                                    <i class="fas fa-image text-green-500 mr-2"></i>
+                                                    <span class="text-sm">background.jpg</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="file-explorer-item">
+                                            <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer">
+                                                <i class="fas fa-chevron-right text-xs mr-1 folder-toggle"></i>
+                                                <i class="fas fa-folder text-yellow-500 mr-2"></i>
+                                                <span class="text-sm">components</span>
+                                            </div>
+                                            <div class="ml-4 mt-1 space-y-1 folder-content hidden">
+                                                <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="header.html">
+                                                    <i class="fab fa-html5 text-orange-500 mr-2"></i>
+                                                    <span class="text-sm">header.html</span>
+                                                </div>
+                                                <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="footer.html">
+                                                    <i class="fab fa-html5 text-orange-500 mr-2"></i>
+                                                    <span class="text-sm">footer.html</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <!-- Output Preview (unchanged) -->
-                    <div class="w-full md:w-1/2 p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-medium text-gray-300">Preview</span>
-                            <div class="flex space-x-2">
-                                <button id="refresh-button" class="text-gray-400 hover:text-gray-200">
-                                    <i class="fas fa-redo"></i>
-                                </button>
-                                <button id="fullscreen-button" class="text-gray-400 hover:text-gray-200">
-                                    <i class="fas fa-expand"></i>
-                                </button>
+                    <!-- Code Editor Section -->
+                    <div class="flex-1 flex flex-col md:flex-row">
+                        <div class="w-full md:w-1/2 p-4 border-r border-gray-700">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm font-medium text-gray-300">HTML</span>
+                                    <div class="flex space-x-1">
+                                        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                                        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button id="copy-button" class="text-gray-400 hover:text-gray-200">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button id="download-button" class="text-gray-400 hover:text-gray-200">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="absolute top-0 left-0 w-12 h-full bg-dark-300 border-r border-gray-700 flex flex-col items-center pt-2">
+                                    <div class="text-xs text-gray-500 font-mono">1</div>
+                                    <div class="text-xs text-gray-500 font-mono">2</div>
+                                    <div class="text-xs text-gray-500 font-mono">3</div>
+                                    <div class="text-xs text-gray-500 font-mono">4</div>
+                                    <div class="text-xs text-gray-500 font-mono">5</div>
+                                </div>
+                                <pre id="code-editor" class="code-editor line-numbers language-html bg-dark-300 rounded-md overflow-auto pl-12" contenteditable="true" spellcheck="false"><!-- Generated code will appear here --></pre>
                             </div>
                         </div>
-                        <div class="relative">
-                            <iframe id="output-frame" class="output-frame w-full rounded-md"></iframe>
+
+                        <!-- Output Preview (unchanged) -->
+                        <div class="w-full md:w-1/2 p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-300">Preview</span>
+                                <div class="flex space-x-2">
+                                    <button id="refresh-button" class="text-gray-400 hover:text-gray-200">
+                                        <i class="fas fa-redo"></i>
+                                    </button>
+                                    <button id="fullscreen-button" class="text-gray-400 hover:text-gray-200">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <iframe id="output-frame" class="output-frame w-full rounded-md"></iframe>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -504,6 +753,122 @@
         <iframe id="fullscreen-preview-content"></iframe>
     </div>
 
+    <!-- Deployment Modal -->
+    <div id="deploy-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-dark-200 rounded-lg p-6 max-w-2xl w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-medium text-gray-100">Deploy Your Site</h3>
+                <button id="close-deploy-modal" class="text-gray-400 hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <button class="deploy-option bg-dark-300 p-4 rounded-lg hover:bg-dark-400 transition-colors" data-platform="github">
+                    <i class="fab fa-github text-2xl mb-2 text-blue-500"></i>
+                    <span class="block text-sm">GitHub Pages</span>
+                </button>
+                <button class="deploy-option bg-dark-300 p-4 rounded-lg hover:bg-dark-400 transition-colors" data-platform="vercel">
+                    <svg class="w-8 h-8 mb-2 mx-auto" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="#3B82F6"/>
+                    </svg>
+                    <span class="block text-sm">Vercel</span>
+                </button>
+                <button class="deploy-option bg-dark-300 p-4 rounded-lg hover:bg-dark-400 transition-colors" data-platform="netlify">
+                    <svg class="w-8 h-8 mb-2 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0L24 24H0L12 0Z" fill="#3B82F6"/>
+                    </svg>
+                    <span class="block text-sm">Netlify</span>
+                </button>
+                <button class="deploy-option bg-dark-300 p-4 rounded-lg hover:bg-dark-400 transition-colors" data-platform="cloudflare">
+                    <i class="fas fa-cloud text-2xl mb-2 text-blue-500"></i>
+                    <span class="block text-sm">Cloudflare</span>
+                </button>
+                <button class="deploy-option bg-dark-300 p-4 rounded-lg hover:bg-dark-400 transition-colors" data-platform="surge">
+                    <i class="fas fa-bolt text-2xl mb-2 text-blue-500"></i>
+                    <span class="block text-sm">Surge</span>
+                </button>
+                <button class="deploy-option bg-dark-300 p-4 rounded-lg hover:bg-dark-400 transition-colors" data-platform="firebase">
+                    <i class="fas fa-fire text-2xl mb-2 text-blue-500"></i>
+                    <span class="block text-sm">Firebase</span>
+                </button>
+            </div>
+            <div id="deploy-instructions" class="hidden bg-dark-300 p-4 rounded-lg">
+                <h4 class="text-lg font-medium text-gray-100 mb-2">Deployment Instructions</h4>
+                <div id="deploy-steps" class="text-gray-300 space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-dark-200 rounded-lg p-6 max-w-md w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-medium text-gray-100">Login</h3>
+                <button id="close-login-modal" class="text-gray-400 hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Social Login Buttons -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button class="social-login-btn bg-white text-gray-800 p-3 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center" data-provider="google">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5 mr-2">
+                    <span>Google</span>
+                </button>
+                <button class="social-login-btn bg-black text-white p-3 rounded-lg hover:bg-gray-900 transition-colors flex items-center justify-center" data-provider="apple">
+                    <i class="fab fa-apple mr-2"></i>
+                    <span>Apple</span>
+                </button>
+                <button class="social-login-btn bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center" data-provider="microsoft">
+                    <i class="fab fa-microsoft mr-2"></i>
+                    <span>Microsoft</span>
+                </button>
+                <button class="social-login-btn bg-gray-800 text-white p-3 rounded-lg hover:bg-gray-900 transition-colors flex items-center justify-center" data-provider="github">
+                    <i class="fab fa-github mr-2"></i>
+                    <span>GitHub</span>
+                </button>
+            </div>
+
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-dark-200 text-gray-400">Or continue with email</span>
+                </div>
+            </div>
+
+            <!-- Email Login Form -->
+            <form id="email-login-form" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                    <input type="email" id="email" name="email" required class="bg-dark-300 border-gray-600 text-gray-200 focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm rounded-md p-2 border">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required class="bg-dark-300 border-gray-600 text-gray-200 focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm rounded-md p-2 border">
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 rounded bg-dark-300">
+                        <label for="remember" class="ml-2 block text-sm text-gray-300">Remember me</label>
+                    </div>
+                    <a href="#" class="text-sm text-blue-500 hover:text-blue-400">Forgot password?</a>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
+                    Sign in
+                </button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <p class="text-sm text-gray-400">
+                    Don't have an account? 
+                    <a href="#" class="text-blue-500 hover:text-blue-400">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- PRISM CHANGE 4: Added local Prism JS -->
     <script src="/prism/prism.js"></script>
 
@@ -688,6 +1053,353 @@
                     });
             });
         }
+
+        // Deployment functionality
+        const deployButton = document.querySelector('button.bg-blue-600.hover\\:bg-blue-700');  // More specific selector
+        const deployModal = document.getElementById('deploy-modal');
+        const closeDeployModal = document.getElementById('close-deploy-modal');
+        const deployOptions = document.querySelectorAll('.deploy-option');
+        const deployInstructions = document.getElementById('deploy-instructions');
+        const deploySteps = document.getElementById('deploy-steps');
+
+        console.log('Deploy button:', deployButton); // Debug log
+
+        const deploymentGuides = {
+            github: [
+                '1. Create a new repository on GitHub',
+                '2. Initialize git in your project folder:',
+                '   git init',
+                '3. Add your files:',
+                '   git add .',
+                '4. Commit your changes:',
+                '   git commit -m "Initial commit"',
+                '5. Add your repository as remote:',
+                '   git remote add origin YOUR_REPO_URL',
+                '6. Push to GitHub:',
+                '   git push -u origin main',
+                '7. Go to repository settings > Pages',
+                '8. Select main branch as source'
+            ],
+            vercel: [
+                '1. Install Vercel CLI:',
+                '   npm i -g vercel',
+                '2. Login to Vercel:',
+                '   vercel login',
+                '3. Deploy your site:',
+                '   vercel'
+            ],
+            netlify: [
+                '1. Install Netlify CLI:',
+                '   npm install netlify-cli -g',
+                '2. Login to Netlify:',
+                '   netlify login',
+                '3. Initialize your site:',
+                '   netlify init',
+                '4. Deploy your site:',
+                '   netlify deploy --prod'
+            ],
+            cloudflare: [
+                '1. Install Wrangler CLI:',
+                '   npm install -g wrangler',
+                '2. Login to Cloudflare:',
+                '   wrangler login',
+                '3. Initialize your project:',
+                '   wrangler init',
+                '4. Deploy your site:',
+                '   wrangler publish'
+            ],
+            surge: [
+                '1. Install Surge CLI:',
+                '   npm install -g surge',
+                '2. Login to Surge:',
+                '   surge login',
+                '3. Deploy your site:',
+                '   surge'
+            ],
+            firebase: [
+                '1. Install Firebase CLI:',
+                '   npm install -g firebase-tools',
+                '2. Login to Firebase:',
+                '   firebase login',
+                '3. Initialize your project:',
+                '   firebase init',
+                '4. Deploy your site:',
+                '   firebase deploy'
+            ]
+        };
+
+        deployButton.addEventListener('click', () => {
+            console.log('Deploy button clicked'); // Debug log
+            deployModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeDeployModal.addEventListener('click', () => {
+            deployModal.classList.add('hidden');
+            document.body.style.overflow = '';
+            deployInstructions.classList.add('hidden');
+        });
+
+        deployOptions.forEach(option => {
+            option.addEventListener('click', async () => {
+                const platform = option.dataset.platform;
+                const steps = deploymentGuides[platform];
+                
+                deploySteps.innerHTML = steps.map(step => `<p>${step}</p>`).join('');
+                deployInstructions.classList.remove('hidden');
+                
+                // Save the code to a temporary file
+                const code = codeEditor.textContent;
+                const blob = new Blob([code], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                
+                // Create a download link
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'index.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                // Auto-connect functionality
+                try {
+                    switch(platform) {
+                        case 'github':
+                            window.open('https://github.com/new', '_blank');
+                            break;
+                        case 'vercel':
+                            window.open('https://vercel.com/new', '_blank');
+                            break;
+                        case 'netlify':
+                            window.open('https://app.netlify.com/start', '_blank');
+                            break;
+                        case 'cloudflare':
+                            window.open('https://dash.cloudflare.com/sign-up', '_blank');
+                            break;
+                        case 'surge':
+                            window.open('https://surge.sh/', '_blank');
+                            break;
+                        case 'firebase':
+                            window.open('https://console.firebase.google.com/', '_blank');
+                            break;
+                    }
+                } catch (error) {
+                    console.error('Error opening platform:', error);
+                }
+            });
+        });
+
+        // Add mobile deploy button functionality
+        const mobileDeployButton = document.getElementById('mobile-deploy-button');
+        const mobileDeployOptions = document.getElementById('mobile-deploy-options');
+        let isDeployOptionsVisible = false;
+
+        mobileDeployButton.addEventListener('click', () => {
+            isDeployOptionsVisible = !isDeployOptionsVisible;
+            if (isDeployOptionsVisible) {
+                mobileDeployOptions.classList.remove('hidden');
+                mobileDeployButton.innerHTML = '<i class="fas fa-chevron-up mr-2"></i>Hide Options';
+            } else {
+                mobileDeployOptions.classList.add('hidden');
+                mobileDeployButton.innerHTML = 'Deploy';
+            }
+        });
+
+        // Login functionality
+        const loginButton = document.getElementById('login-button');
+        const mobileLoginButton = document.getElementById('mobile-login-button');
+        const loginModal = document.getElementById('login-modal');
+        const closeLoginModal = document.getElementById('close-login-modal');
+        const emailLoginForm = document.getElementById('email-login-form');
+        const socialLoginButtons = document.querySelectorAll('.social-login-btn');
+
+        function openLoginModal() {
+            loginModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLoginModalFunc() {
+            loginModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        loginButton.addEventListener('click', openLoginModal);
+        mobileLoginButton.addEventListener('click', openLoginModal);
+        closeLoginModal.addEventListener('click', closeLoginModalFunc);
+
+        // Handle email login
+        emailLoginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+
+            try {
+                // Here you would typically make an API call to your backend
+                console.log('Login attempt:', { email, password, remember });
+                // For now, we'll just show a success message
+                alert('Login functionality will be implemented with your backend');
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            }
+        });
+
+        // Handle social login
+        socialLoginButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const provider = button.dataset.provider;
+                try {
+                    // Here you would typically initiate OAuth flow
+                    console.log('Social login attempt:', provider);
+                    // For now, we'll just show a message
+                    alert(`${provider} login will be implemented with your backend`);
+                } catch (error) {
+                    console.error('Social login error:', error);
+                    alert('Login failed. Please try again.');
+                }
+            });
+        });
+
+        // Enhanced File Explorer functionality
+        const fileExplorer = document.getElementById('file-explorer');
+        const collapseExplorer = document.getElementById('collapse-explorer');
+
+        // Toggle entire explorer
+        collapseExplorer.addEventListener('click', () => {
+            fileExplorer.classList.toggle('collapsed');
+            // Keep the collapse button visible
+            collapseExplorer.style.display = 'block';
+        });
+
+        // Toggle folders
+        document.querySelectorAll('.folder-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const folderContent = e.target.closest('.file-explorer-item').querySelector('.folder-content');
+                if (folderContent) {
+                    folderContent.classList.toggle('hidden');
+                    toggle.classList.toggle('fa-chevron-right');
+                    toggle.classList.toggle('fa-chevron-down');
+                }
+            });
+        });
+
+        // File selection and editing
+        document.querySelectorAll('.file-item').forEach(file => {
+            file.addEventListener('click', () => {
+                // Remove active class from all files
+                document.querySelectorAll('.file-item').forEach(f => f.classList.remove('active'));
+                // Add active class to clicked file
+                file.classList.add('active');
+                
+                const fileName = file.dataset.file;
+                console.log(`Selected file: ${fileName}`);
+
+                // Create or update file content
+                let fileContent = localStorage.getItem(`file_${fileName}`) || '';
+                
+                if (!fileContent) {
+                    // Set default content based on file type
+                    if (fileName.endsWith('.html')) {
+                        fileContent = `<!-- ${fileName} content -->\n<div class="container">\n  <h1>${fileName}</h1>\n</div>`;
+                    } else if (fileName.endsWith('.css')) {
+                        fileContent = `/* ${fileName} styles */\n.container {\n  /* Add your styles here */\n}`;
+                    } else if (fileName.endsWith('.js')) {
+                        fileContent = `// ${fileName} script\n\n// Add your JavaScript code here`;
+                    } else if (fileName.endsWith('.png') || fileName.endsWith('.jpg')) {
+                        fileContent = `[Image file: ${fileName}]`;
+                    }
+                }
+
+                // Update the editor content
+                codeEditor.textContent = fileContent;
+                Prism.highlightElement(codeEditor);
+                updateOutput();
+
+                // Save changes when editor content changes
+                codeEditor.addEventListener('input', () => {
+                    localStorage.setItem(`file_${fileName}`, codeEditor.textContent);
+                });
+            });
+        });
+
+        // Add new file functionality
+        function addNewFile(parentFolder, fileName, fileType) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item';
+            fileItem.dataset.file = fileName;
+
+            let iconClass = 'fas fa-file';
+            if (fileName.endsWith('.html')) {
+                iconClass = 'fab fa-html5 text-orange-500';
+            } else if (fileName.endsWith('.css')) {
+                iconClass = 'fab fa-css3-alt text-blue-500';
+            } else if (fileName.endsWith('.js')) {
+                iconClass = 'fab fa-js text-yellow-400';
+            } else if (fileName.endsWith('.png') || fileName.endsWith('.jpg')) {
+                iconClass = 'fas fa-image text-green-500';
+            }
+
+            fileItem.innerHTML = `
+                <i class="${iconClass} mr-2"></i>
+                <span class="text-sm">${fileName}</span>
+            `;
+
+            parentFolder.querySelector('.folder-content').appendChild(fileItem);
+            
+            // Add click event listener to the new file
+            fileItem.addEventListener('click', () => {
+                document.querySelectorAll('.file-item').forEach(f => f.classList.remove('active'));
+                fileItem.classList.add('active');
+                
+                let fileContent = localStorage.getItem(`file_${fileName}`) || '';
+                if (!fileContent) {
+                    if (fileName.endsWith('.html')) {
+                        fileContent = `<!-- ${fileName} content -->\n<div class="container">\n  <h1>${fileName}</h1>\n</div>`;
+                    } else if (fileName.endsWith('.css')) {
+                        fileContent = `/* ${fileName} styles */\n.container {\n  /* Add your styles here */\n}`;
+                    } else if (fileName.endsWith('.js')) {
+                        fileContent = `// ${fileName} script\n\n// Add your JavaScript code here`;
+                    }
+                }
+
+                codeEditor.textContent = fileContent;
+                Prism.highlightElement(codeEditor);
+                updateOutput();
+            });
+        }
+
+        // Add new folder functionality
+        function addNewFolder(parentFolder, folderName) {
+            const folderItem = document.createElement('div');
+            folderItem.className = 'file-explorer-item';
+            folderItem.innerHTML = `
+                <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer">
+                    <i class="fas fa-chevron-right text-xs mr-1 folder-toggle"></i>
+                    <i class="fas fa-folder text-yellow-500 mr-2"></i>
+                    <span class="text-sm">${folderName}</span>
+                </div>
+                <div class="ml-4 mt-1 space-y-1 folder-content hidden"></div>
+            `;
+
+            parentFolder.querySelector('.folder-content').appendChild(folderItem);
+            
+            // Add folder toggle functionality
+            const toggle = folderItem.querySelector('.folder-toggle');
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const folderContent = folderItem.querySelector('.folder-content');
+                folderContent.classList.toggle('hidden');
+                toggle.classList.toggle('fa-chevron-right');
+                toggle.classList.toggle('fa-chevron-down');
+            });
+        }
+
+        // Example usage of adding new files/folders
+        // addNewFile(document.querySelector('.folder-content'), 'new-file.html', 'html');
+        // addNewFolder(document.querySelector('.folder-content'), 'new-folder');
     </script>
     <script>
 document.getElementById('contact-form').addEventListener('submit', async function(e) {
