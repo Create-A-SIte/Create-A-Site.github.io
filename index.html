@@ -1788,69 +1788,217 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // EXPLORER COLLAPSE/EXPAND
+  const fileExplorer = document.getElementById('file-explorer');
+  const collapseExplorer = document.getElementById('collapse-explorer');
+  if (collapseExplorer && fileExplorer) {
+    collapseExplorer.addEventListener('click', function() {
+      fileExplorer.classList.toggle('collapsed');
+      collapseExplorer.style.display = 'block';
+    });
+  }
+
   // LOGIN MODAL
   const loginButton = document.getElementById('login-button');
+  const mobileLoginButton = document.getElementById('mobile-login-button');
   const loginModal = document.getElementById('login-modal');
   const closeLoginModal = document.getElementById('close-login-modal');
   if (loginButton && loginModal && closeLoginModal) {
-    loginButton.addEventListener('click', function() {
-      console.log('Login button clicked');
+    function openLoginModal() {
       loginModal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
-    });
-    closeLoginModal.addEventListener('click', function() {
+    }
+    function closeLoginModalFunc() {
       loginModal.classList.add('hidden');
       document.body.style.overflow = '';
-    });
-  } else {
-    console.log('Login modal or button not found');
+    }
+    loginButton.addEventListener('click', openLoginModal);
+    if (mobileLoginButton) mobileLoginButton.addEventListener('click', openLoginModal);
+    closeLoginModal.addEventListener('click', closeLoginModalFunc);
   }
 
-  // DEPLOY MODAL
+  // DEPLOY MODAL & OPTIONS
   const deployButton = document.querySelector('button.bg-blue-600');
   const deployModal = document.getElementById('deploy-modal');
   const closeDeployModal = document.getElementById('close-deploy-modal');
+  const deployOptions = document.querySelectorAll('.deploy-option');
+  const deployInstructions = document.getElementById('deploy-instructions');
+  const deploySteps = document.getElementById('deploy-steps');
+  const codeEditor = document.getElementById('code-editor');
   if (deployButton && deployModal && closeDeployModal) {
-    deployButton.addEventListener('click', function() {
-      console.log('Deploy button clicked');
+    deployButton.addEventListener('click', () => {
       deployModal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     });
-    closeDeployModal.addEventListener('click', function() {
+    closeDeployModal.addEventListener('click', () => {
       deployModal.classList.add('hidden');
       document.body.style.overflow = '';
+      if (deployInstructions) deployInstructions.classList.add('hidden');
     });
-  } else {
-    console.log('Deploy modal or button not found');
+    const guides = {
+      github: [
+        '1. Create a new repository on GitHub',
+        '2. Initialize git in your project folder:',
+        '   git init',
+        '3. Add your files:',
+        '   git add .',
+        '4. Commit your changes:',
+        '   git commit -m "Initial commit"',
+        '5. Add your repository as remote:',
+        '   git remote add origin YOUR_REPO_URL',
+        '6. Push to GitHub:',
+        '   git push -u origin main',
+        '7. Go to repository settings > Pages',
+        '8. Select main branch as source'
+      ],
+      vercel: [
+        '1. Install Vercel CLI:',
+        '   npm i -g vercel',
+        '2. Login to Vercel:',
+        '   vercel login',
+        '3. Deploy your site:',
+        '   vercel'
+      ],
+      netlify: [
+        '1. Install Netlify CLI:',
+        '   npm install netlify-cli -g',
+        '2. Login to Netlify:',
+        '   netlify login',
+        '3. Initialize your site:',
+        '   netlify init',
+        '4. Deploy your site:',
+        '   netlify deploy --prod'
+      ],
+      cloudflare: [
+        '1. Install Wrangler CLI:',
+        '   npm install -g wrangler',
+        '2. Login to Cloudflare:',
+        '   wrangler login',
+        '3. Initialize your project:',
+        '   wrangler init',
+        '4. Deploy your site:',
+        '   wrangler publish'
+      ],
+      surge: [
+        '1. Install Surge CLI:',
+        '   npm install -g surge',
+        '2. Login to Surge:',
+        '   surge login',
+        '3. Deploy your site:',
+        '   surge'
+      ],
+      firebase: [
+        '1. Install Firebase CLI:',
+        '   npm install -g firebase-tools',
+        '2. Login to Firebase:',
+        '   firebase login',
+        '3. Initialize your project:',
+        '   firebase init',
+        '4. Deploy your site:',
+        '   firebase deploy'
+      ]
+    };
+    const deployLinks = {
+      github: 'https://github.com/new',
+      vercel: 'https://vercel.com/new',
+      netlify: 'https://app.netlify.com/start',
+      cloudflare: 'https://dash.cloudflare.com/sign-up',
+      surge: 'https://surge.sh/',
+      firebase: 'https://console.firebase.google.com/'
+    };
+    deployOptions.forEach(option => {
+      option.addEventListener('click', async () => {
+        const platform = option.dataset.platform;
+        // Download code as index.html
+        const blob = new Blob([codeEditor.textContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'index.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        // Open deploy site
+        window.open(deployLinks[platform], '_blank');
+        // Show instructions
+        deploySteps.innerHTML = guides[platform].map(step => `<p>${step}</p>`).join('');
+        deployInstructions.classList.remove('hidden');
+      });
+    });
   }
 
-  // RIGHT-CLICK CONTEXT MENU
-  const fileExplorer = document.getElementById('file-explorer');
+  // RIGHT-CLICK CONTEXT MENU FOR FILES/FOLDERS
   const contextMenu = document.getElementById('context-menu');
   let contextTarget = null;
-  if (fileExplorer && contextMenu) {
-    fileExplorer.addEventListener('contextmenu', function(e) {
-      const fileItem = e.target.closest('.file-item');
-      const folderItem = e.target.closest('.file-explorer-item > .flex');
-      if (fileItem || folderItem) {
-        e.preventDefault();
-        contextTarget = fileItem || folderItem;
-        contextMenu.style.top = e.clientY + 'px';
-        contextMenu.style.left = e.clientX + 'px';
-        contextMenu.style.display = 'block';
-        contextMenu.querySelector('[data-action=\"add-file\"]').style.display = folderItem ? 'block' : 'none';
-        console.log('Custom context menu opened');
-      } else {
-        contextMenu.style.display = 'none';
-      }
-    });
-    window.addEventListener('click', () => {
+  fileExplorer.addEventListener('contextmenu', function(e) {
+    const fileItem = e.target.closest('.file-item');
+    const folderItem = e.target.closest('.file-explorer-item > .flex');
+    if (fileItem || folderItem) {
+      e.preventDefault();
+      contextTarget = fileItem || folderItem;
+      contextMenu.style.top = e.clientY + 'px';
+      contextMenu.style.left = e.clientX + 'px';
+      contextMenu.style.display = 'block';
+      contextMenu.querySelector('[data-action="add-file"]').style.display = folderItem ? 'block' : 'none';
+    } else {
       contextMenu.style.display = 'none';
-    });
-  } else {
-    console.log('File explorer or context menu not found');
-  }
+    }
+  });
+  window.addEventListener('click', () => {
+    contextMenu.style.display = 'none';
+  });
+  contextMenu.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('context-menu-item')) return;
+    const action = e.target.getAttribute('data-action');
+    if (!contextTarget) return;
+    if (action === 'rename') {
+      const nameSpan = contextTarget.querySelector('.file-name, .folder-name');
+      if (nameSpan) {
+        nameSpan.contentEditable = true;
+        nameSpan.classList.add('editing');
+        nameSpan.focus();
+        const range = document.createRange();
+        range.selectNodeContents(nameSpan);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const handleRename = () => {
+          nameSpan.contentEditable = false;
+          nameSpan.classList.remove('editing');
+          if (!nameSpan.textContent.trim()) nameSpan.textContent = 'untitled';
+        };
+        nameSpan.addEventListener('blur', handleRename, { once: true });
+        nameSpan.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleRename();
+          }
+        });
+      }
+    } else if (action === 'delete') {
+      if (contextTarget.classList.contains('file-item')) {
+        if (confirm('Delete this file?')) contextTarget.remove();
+      } else if (contextTarget.classList.contains('flex')) {
+        const folder = contextTarget.closest('.file-explorer-item');
+        if (folder && confirm('Delete this folder and all its contents?')) folder.remove();
+      }
+    } else if (action === 'add-file') {
+      const folder = contextTarget.closest('.file-explorer-item');
+      const folderContent = folder.querySelector('.folder-content');
+      const fileName = prompt('Enter file name (include extension):');
+      if (fileName) {
+        const div = document.createElement('div');
+        div.className = 'flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item';
+        div.setAttribute('data-file', fileName);
+        div.innerHTML = `<i class='fas fa-file text-gray-400 mr-2'></i><span class='text-sm file-name'>${fileName}</span>`;
+        folderContent.appendChild(div);
+      }
+    }
+    contextMenu.style.display = 'none';
+  });
 });
 </script>
+
 </body>
 </html>
