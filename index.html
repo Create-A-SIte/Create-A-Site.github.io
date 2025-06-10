@@ -1615,6 +1615,24 @@
             contextMenu.style.display = 'none';
           }
         });
+
+        const fileExplorer = document.getElementById('file-explorer');
+
+        fileExplorer.addEventListener('contextmenu', function(e) {
+          const fileItem = e.target.closest('.file-item');
+          const folderItem = e.target.closest('.file-explorer-item > .flex');
+          if (fileItem) {
+            e.preventDefault();
+            // Replace this with your menu logic
+            console.log('Open file context menu for:', fileItem.querySelector('.file-name').textContent);
+            // openFileMenu(fileItem); // Example: your menu function
+          } else if (folderItem) {
+            e.preventDefault();
+            // Replace this with your menu logic
+            console.log('Open folder context menu for:', folderItem.querySelector('.folder-name').textContent);
+            // openFolderMenu(folderItem); // Example: your menu function
+          }
+        });
     </script>
     <script>
 document.getElementById('contact-form').addEventListener('submit', async function(e) {
