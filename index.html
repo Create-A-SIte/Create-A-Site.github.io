@@ -497,66 +497,35 @@
                                         <i class="fas fa-chevron-right text-xs mr-1 folder-toggle"></i>
                                         <i class="fas fa-folder text-yellow-500 mr-2"></i>
                                         <span class="text-sm folder-name">my-project</span>
-                                        <button class="add-file-btn ml-auto">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
                                     </div>
                                     <!-- Project Files -->
                                     <div class="ml-4 mt-1 space-y-1 folder-content">
                                         <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item relative" data-file="index.html">
                                             <i class="fab fa-html5 text-orange-500 mr-2"></i>
                                             <span class="text-sm file-name">index.html</span>
-                                            <div class="file-actions">
-                                                <button class="delete-file" title="Delete file">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
                                         </div>
                                         <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="styles.css">
                                             <i class="fab fa-css3-alt text-blue-500 mr-2"></i>
                                             <span class="text-sm file-name">styles.css</span>
-                                            <div class="file-actions">
-                                                <button class="delete-file" title="Delete file">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
                                         </div>
                                         <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="script.js">
                                             <i class="fab fa-js text-yellow-400 mr-2"></i>
                                             <span class="text-sm file-name">script.js</span>
-                                            <div class="file-actions">
-                                                <button class="delete-file" title="Delete file">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
                                         </div>
                                         <div class="file-explorer-item">
                                             <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer">
                                                 <i class="fas fa-chevron-right text-xs mr-1 folder-toggle"></i>
                                                 <i class="fas fa-folder text-yellow-500 mr-2"></i>
                                                 <span class="text-sm file-name">assets</span>
-                                                <button class="add-file-btn ml-auto">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
                                             </div>
                                             <div class="ml-4 mt-1 space-y-1 folder-content hidden">
                                                 <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="logo.png">
                                                     <i class="fas fa-image text-green-500 mr-2"></i>
                                                     <span class="text-sm file-name">logo.png</span>
-                                                    <div class="file-actions">
-                                                        <button class="delete-file" title="Delete file">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
                                                 </div>
                                                 <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="background.jpg">
                                                     <i class="fas fa-image text-green-500 mr-2"></i>
                                                     <span class="text-sm file-name">background.jpg</span>
-                                                    <div class="file-actions">
-                                                        <button class="delete-file" title="Delete file">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -565,28 +534,15 @@
                                                 <i class="fas fa-chevron-right text-xs mr-1 folder-toggle"></i>
                                                 <i class="fas fa-folder text-yellow-500 mr-2"></i>
                                                 <span class="text-sm file-name">components</span>
-                                                <button class="add-file-btn ml-auto">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
                                             </div>
                                             <div class="ml-4 mt-1 space-y-1 folder-content hidden">
                                                 <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="header.html">
                                                     <i class="fab fa-html5 text-orange-500 mr-2"></i>
                                                     <span class="text-sm file-name">header.html</span>
-                                                    <div class="file-actions">
-                                                        <button class="delete-file" title="Delete file">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
                                                 </div>
                                                 <div class="flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item" data-file="footer.html">
                                                     <i class="fab fa-html5 text-orange-500 mr-2"></i>
                                                     <span class="text-sm file-name">footer.html</span>
-                                                    <div class="file-actions">
-                                                        <button class="delete-file" title="Delete file">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1425,72 +1381,6 @@
             });
         });
 
-        // Add new file functionality
-        document.querySelectorAll('.add-file-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const folder = e.target.closest('.file-explorer-item');
-                const folderContent = folder.querySelector('.folder-content');
-                
-                const fileName = prompt('Enter file name (include extension):');
-                if (fileName) {
-                    addNewFile(folderContent, fileName);
-                }
-            });
-        });
-
-        // Delete file functionality
-        document.querySelectorAll('.delete-file').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const fileItem = e.target.closest('.file-item');
-                if (confirm('Are you sure you want to delete this file?')) {
-                    fileItem.remove();
-                }
-            });
-        });
-
-        // File renaming functionality
-        document.querySelectorAll('.file-name').forEach(fileName => {
-            fileName.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
-                const currentName = fileName.textContent;
-                fileName.contentEditable = true;
-                fileName.classList.add('editing');
-                fileName.focus();
-                
-                // Select all text
-                const range = document.createRange();
-                range.selectNodeContents(fileName);
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-                
-                // Handle blur and enter key
-                const handleRename = () => {
-                    fileName.contentEditable = false;
-                    fileName.classList.remove('editing');
-                    const newName = fileName.textContent.trim();
-                    if (!newName) {
-                        fileName.textContent = currentName;
-                    } else {
-                        // Update file icon based on new extension
-                        const fileItem = fileName.closest('.file-item');
-                        const icon = fileItem.querySelector('i');
-                        updateFileIcon(icon, newName);
-                    }
-                };
-                
-                fileName.addEventListener('blur', handleRename, { once: true });
-                fileName.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleRename();
-                    }
-                });
-            });
-        });
-
         // Update file icon based on extension
         function updateFileIcon(icon, fileName) {
             const extension = fileName.split('.').pop().toLowerCase();
@@ -1692,7 +1582,7 @@
                 const div = document.createElement('div');
                 div.className = 'flex items-center text-gray-300 hover:bg-dark-300 rounded px-2 py-1 cursor-pointer file-item';
                 div.setAttribute('data-file', fileName);
-                div.innerHTML = `<i class='fas fa-file text-gray-400 mr-2'></i><span class='text-sm file-name'>${fileName}</span><div class='file-actions'><button class='delete-file' title='Delete file'><i class='fas fa-trash'></i></button></div>`;
+                div.innerHTML = `<i class='fas fa-file text-gray-400 mr-2'></i><span class='text-sm file-name'>${fileName}</span>`;
                 folderContent.appendChild(div);
                 attachContextMenuHandlers();
               }
