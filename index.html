@@ -1366,18 +1366,31 @@
             const fileItems = document.querySelectorAll('.file-item');
             const folderItems = document.querySelectorAll('.file-explorer-item');
 
+            // Search through files
             fileItems.forEach(item => {
                 const fileName = item.querySelector('.file-name').textContent.toLowerCase();
                 const shouldShow = fileName.includes(searchTerm);
                 item.style.display = shouldShow ? 'flex' : 'none';
             });
 
+            // Search through folders
             folderItems.forEach(folder => {
                 const folderName = folder.querySelector('.folder-name')?.textContent.toLowerCase() || '';
-                const hasVisibleFiles = Array.from(folder.querySelectorAll('.file-item'))
-                    .some(item => item.style.display !== 'none');
-                const shouldShow = folderName.includes(searchTerm) || hasVisibleFiles;
+                const shouldShow = folderName.includes(searchTerm);
                 folder.style.display = shouldShow ? 'block' : 'none';
+                
+                // If folder matches search, show its contents
+                if (shouldShow) {
+                    const folderContent = folder.querySelector('.folder-content');
+                    if (folderContent) {
+                        folderContent.classList.remove('hidden');
+                        const toggle = folder.querySelector('.folder-toggle');
+                        if (toggle) {
+                            toggle.classList.remove('fa-chevron-right');
+                            toggle.classList.add('fa-chevron-down');
+                        }
+                    }
+                }
             });
         });
 
