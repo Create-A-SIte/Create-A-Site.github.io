@@ -1366,21 +1366,64 @@
             const fileItems = document.querySelectorAll('.file-item');
             const folderItems = document.querySelectorAll('.file-explorer-item');
 
-            // Search through files
+            // First, hide everything
+            folderItems.forEach(folder => {
+                folder.style.display = 'none';
+                // Also hide all folder contents
+                const folderContent = folder.querySelector('.folder-content');
+                if (folderContent) {
+                    folderContent.classList.add('hidden');
+                    const toggle = folder.querySelector('.folder-toggle');
+                    if (toggle) {
+                        toggle.classList.remove('fa-chevron-down');
+                        toggle.classList.add('fa-chevron-right');
+                    }
+                }
+            });
             fileItems.forEach(item => {
-                const fileName = item.querySelector('.file-name').textContent.toLowerCase();
-                const shouldShow = fileName.includes(searchTerm);
-                item.style.display = shouldShow ? 'flex' : 'none';
+                item.style.display = 'none';
             });
 
-            // Search through folders
+            // If search is empty, show everything
+            if (!searchTerm) {
+                folderItems.forEach(folder => {
+                    folder.style.display = 'block';
+                });
+                fileItems.forEach(item => {
+                    item.style.display = 'flex';
+                });
+                return;
+            }
+
+            // Search through files and show matches
+            fileItems.forEach(item => {
+                const fileName = item.querySelector('.file-name').textContent.toLowerCase();
+                if (fileName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                    // Show and expand all parent folders of matching files
+                    let parentFolder = item.closest('.file-explorer-item');
+                    while (parentFolder) {
+                        parentFolder.style.display = 'block';
+                        const folderContent = parentFolder.querySelector('.folder-content');
+                        if (folderContent) {
+                            folderContent.classList.remove('hidden');
+                            const toggle = parentFolder.querySelector('.folder-toggle');
+                            if (toggle) {
+                                toggle.classList.remove('fa-chevron-right');
+                                toggle.classList.add('fa-chevron-down');
+                            }
+                        }
+                        parentFolder = parentFolder.parentElement.closest('.file-explorer-item');
+                    }
+                }
+            });
+
+            // Search through folders and show matches
             folderItems.forEach(folder => {
                 const folderName = folder.querySelector('.folder-name')?.textContent.toLowerCase() || '';
-                const shouldShow = folderName.includes(searchTerm);
-                folder.style.display = shouldShow ? 'block' : 'none';
-                
-                // If folder matches search, show its contents
-                if (shouldShow) {
+                if (folderName.includes(searchTerm)) {
+                    folder.style.display = 'block';
+                    // Show folder contents
                     const folderContent = folder.querySelector('.folder-content');
                     if (folderContent) {
                         folderContent.classList.remove('hidden');
@@ -1389,6 +1432,21 @@
                             toggle.classList.remove('fa-chevron-right');
                             toggle.classList.add('fa-chevron-down');
                         }
+                    }
+                    // Show and expand all parent folders
+                    let parentFolder = folder.parentElement.closest('.file-explorer-item');
+                    while (parentFolder) {
+                        parentFolder.style.display = 'block';
+                        const parentContent = parentFolder.querySelector('.folder-content');
+                        if (parentContent) {
+                            parentContent.classList.remove('hidden');
+                            const toggle = parentFolder.querySelector('.folder-toggle');
+                            if (toggle) {
+                                toggle.classList.remove('fa-chevron-right');
+                                toggle.classList.add('fa-chevron-down');
+                            }
+                        }
+                        parentFolder = parentFolder.parentElement.closest('.file-explorer-item');
                     }
                 }
             });
