@@ -1745,6 +1745,80 @@
           });
         });
         // ... existing code ...
+
+        // File editing and auto-save functionality
+        let autoSaveTimeout;
+
+        // Function to save file content
+        function saveFileContent(fileName, content) {
+            localStorage.setItem(`file_${fileName}`, content);
+        }
+
+        // Function to load file content
+        function loadFileContent(fileName) {
+            return localStorage.getItem(`file_${fileName}`) || '';
+        }
+
+        // Update file selection to use new language detection and auto-save
+        document.querySelectorAll('.file-item').forEach(file => {
+            file.addEventListener('click', () => {
+                // Remove active class from all files
+                document.querySelectorAll('.file-item').forEach(f => f.classList.remove('active'));
+                // Add active class to clicked file
+                file.classList.add('active');
+                
+                const fileName = file.querySelector('.file-name').textContent;
+                const fileContent = loadFileContent(fileName);
+                
+                // Update Prism language
+                updatePrismLanguage(fileName);
+                
+                // Update editor content
+                codeEditor.textContent = fileContent;
+                Prism.highlightElement(codeEditor);
+                updateOutput();
+            });
+        });
+
+        // Add auto-save functionality to code editor
+        codeEditor.addEventListener('input', () => {
+            const activeFile = document.querySelector('.file-item.active');
+            if (activeFile) {
+                const fileName = activeFile.querySelector('.file-name').textContent;
+                
+                // Clear previous timeout
+                clearTimeout(autoSaveTimeout);
+                
+                // Set new timeout for auto-save
+                autoSaveTimeout = setTimeout(() => {
+                    saveFileContent(fileName, codeEditor.textContent);
+                    // Update syntax highlighting
+                    Prism.highlightElement(codeEditor);
+                    updateOutput();
+                }, 500); // Auto-save after 500ms of no typing
+            }
+        });
+
+        // Make code editor editable
+        codeEditor.contentEditable = true;
+        codeEditor.spellcheck = false;
+
+        // Prevent default tab behavior and insert spaces instead
+        codeEditor.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                document.execCommand('insertText', false, '    ');
+            }
+        });
+
+        // Update output when code changes
+        function updateOutput() {
+            const outputFrame = document.getElementById('output-frame');
+            if (outputFrame) {
+                const content = codeEditor.textContent;
+                outputFrame.srcdoc = content;
+            }
+        }
     </script>
     <script>
 document.getElementById('contact-form').addEventListener('submit', async function(e) {
