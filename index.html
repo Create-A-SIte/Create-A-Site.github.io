@@ -25,6 +25,16 @@
     
     <title>Create-A-Site</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Add Prism CSS and JS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-html.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-markdown.min.js"></script>
+    
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -1137,13 +1147,19 @@
             document.body.style.overflow = '';
         });
 
-        // Service Worker (unchanged)
+        // ServiceWorker registration with proper checks
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        setInterval(() => registration.update(), 60 * 60 * 1000);
-                    });
+            window.addEventListener('load', () => {
+                // Only register if we're on HTTPS or localhost
+                if (window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(registration => {
+                            console.log('ServiceWorker registration successful');
+                        })
+                        .catch(err => {
+                            console.log('ServiceWorker registration failed:', err);
+                        });
+                }
             });
         }
 
@@ -1687,24 +1703,6 @@
           }
         });
 
-        const fileExplorer = document.getElementById('file-explorer');
-
-        fileExplorer.addEventListener('contextmenu', function(e) {
-          const fileItem = e.target.closest('.file-item');
-          const folderItem = e.target.closest('.file-explorer-item > .flex');
-          if (fileItem) {
-            e.preventDefault();
-            // Replace this with your menu logic
-            console.log('Open file context menu for:', fileItem.querySelector('.file-name').textContent);
-            // openFileMenu(fileItem); // Example: your menu function
-          } else if (folderItem) {
-            e.preventDefault();
-            // Replace this with your menu logic
-            console.log('Open folder context menu for:', folderItem.querySelector('.folder-name').textContent);
-            // openFolderMenu(folderItem); // Example: your menu function
-          }
-        });
-
         // ... existing code ...
         document.addEventListener('DOMContentLoaded', function() {
           // Ensure all folders start closed
@@ -1819,6 +1817,156 @@
                 outputFrame.srcdoc = content;
             }
         }
+
+        // ... existing code ...
+        fileExplorer.addEventListener('contextmenu', function(e) {
+          const fileItem = e.target.closest('.file-item');
+          const folderItem = e.target.closest('.file-explorer-item > .flex');
+          if (fileItem) {
+            e.preventDefault();
+            // Replace this with your menu logic
+            console.log('Open file context menu for:', fileItem.querySelector('.file-name').textContent);
+            // openFileMenu(fileItem); // Example: your menu function
+          } else if (folderItem) {
+            e.preventDefault();
+            // Replace this with your menu logic
+            console.log('Open folder context menu for:', folderItem.querySelector('.folder-name').textContent);
+            // openFolderMenu(folderItem); // Example: your menu function
+          }
+        });
+
+        // ... existing code ...
+
+        // ... existing code ...
+        // Add folder toggle functionality
+        document.querySelectorAll('.folder-toggle').forEach(toggle => {
+            if (!toggle) return;
+            
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const folderItem = toggle.closest('.file-explorer-item');
+                if (!folderItem) return;
+                
+                const subfolder = folderItem.querySelector('.subfolder');
+                const isExpanded = folderItem.classList.contains('expanded');
+                
+                // Toggle expanded class
+                folderItem.classList.toggle('expanded');
+                
+                // Toggle subfolder visibility with animation
+                if (subfolder) {
+                    if (isExpanded) {
+                        subfolder.style.display = 'none';
+                    } else {
+                        subfolder.style.display = 'block';
+                        subfolder.style.opacity = '0';
+                        setTimeout(() => {
+                            subfolder.style.opacity = '1';
+                        }, 10);
+                    }
+                }
+                
+                // Toggle folder icon
+                const folderIcon = toggle.querySelector('i');
+                if (folderIcon) {
+                    folderIcon.className = isExpanded ? 'fas fa-folder' : 'fas fa-folder-open';
+                }
+            });
+        });
+
+        // Add file click functionality
+        document.querySelectorAll('.file-item').forEach(file => {
+            if (!file) return;
+            
+            file.addEventListener('click', () => {
+                // Remove active class from all files
+                document.querySelectorAll('.file-item').forEach(f => f.classList.remove('active'));
+                
+                // Add active class to clicked file
+                file.classList.add('active');
+                
+                const fileNameElement = file.querySelector('.file-name');
+                if (!fileNameElement) return;
+                
+                const fileName = fileNameElement.textContent;
+                const fileContent = localStorage.getItem(`file_${fileName}`) || '';
+                
+                // Update editor content
+                if (codeEditor) {
+                    // Make editor visible and active
+                    codeEditor.style.display = 'block';
+                    codeEditor.focus();
+                    
+                    // Update content
+                    codeEditor.textContent = fileContent;
+                    
+                    // Update syntax highlighting
+                    const extension = fileName.split('.').pop().toLowerCase();
+                    codeEditor.className = codeEditor.className.replace(/language-\w+/g, '');
+                    codeEditor.classList.add(`language-${extension}`);
+                    
+                    if (typeof Prism !== 'undefined') {
+                        Prism.highlightElement(codeEditor);
+                    }
+                    
+                    // Update output preview
+                    updateOutput();
+                    
+                    // Add auto-save functionality
+                    codeEditor.addEventListener('input', () => {
+                        clearTimeout(autoSaveTimeout);
+                        autoSaveTimeout = setTimeout(() => {
+                            localStorage.setItem(`file_${fileName}`, codeEditor.textContent);
+                            Prism.highlightElement(codeEditor);
+                            updateOutput();
+                        }, 500);
+                    });
+                }
+            });
+        });
+
+        // Add folder click functionality
+        document.querySelectorAll('.file-explorer-item > .flex').forEach(folder => {
+            if (!folder) return;
+            
+            folder.addEventListener('click', (e) => {
+                if (!e.target.closest('.folder-toggle')) {
+                    // Remove active class from all folders
+                    document.querySelectorAll('.file-explorer-item > .flex').forEach(f => f.classList.remove('active'));
+                    
+                    // Add active class to clicked folder
+                    folder.classList.add('active');
+                    
+                    // Toggle the folder if it's not already toggled
+                    const folderItem = folder.closest('.file-explorer-item');
+                    if (folderItem && !folderItem.classList.contains('expanded')) {
+                        const toggle = folderItem.querySelector('.folder-toggle');
+                        if (toggle) {
+                            toggle.click();
+                        }
+                    }
+                }
+            });
+        });
+
+        // Add some CSS for smooth transitions
+        const style = document.createElement('style');
+        style.textContent = `
+            .subfolder {
+                transition: opacity 0.2s ease-in-out;
+            }
+            .file-item, .file-explorer-item > .flex {
+                transition: background-color 0.2s ease-in-out;
+            }
+            .file-item:hover, .file-explorer-item > .flex:hover {
+                background-color: rgba(0, 0, 0, 0.05);
+            }
+            .file-item.active, .file-explorer-item > .flex.active {
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+        `;
+        document.head.appendChild(style);
+// ... existing code ...
     </script>
     <script>
 document.getElementById('contact-form').addEventListener('submit', async function(e) {
